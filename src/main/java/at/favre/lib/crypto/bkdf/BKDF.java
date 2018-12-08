@@ -7,6 +7,9 @@ import java.security.SecureRandom;
 
 public final class BKDF {
 
+    private BKDF() {
+    }
+
     public static PasswordHasher createPasswordHasher() {
         return new PasswordHasher.Default((byte) Bytes.from((byte) 64).toUnsignedByte(), HKDF.fromHmacSha256(), new SecureRandom(), false);
     }
