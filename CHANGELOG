@@ -1,5 +1,10 @@
 # Releases
 
+## v0.2.0
+
+* Substantial refactorings
+* Add reference tests for password hasher
+
 ## v0.1.0
 
 initial version
