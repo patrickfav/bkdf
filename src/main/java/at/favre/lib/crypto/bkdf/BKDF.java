@@ -19,7 +19,7 @@ public final class BKDF {
         return new PasswordHasher.Default(version, secureRandom);
     }
 
-    public static PasswordHashVerifier createPasswordHashVerifier(Version version, SecureRandom secureRandom) {
+    public static PasswordHashVerifier createPasswordHashVerifier() {
         return new PasswordHashVerifier.Default();
     }
 
