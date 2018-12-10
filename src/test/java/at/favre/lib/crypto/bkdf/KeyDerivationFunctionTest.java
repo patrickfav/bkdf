@@ -1,7 +1,6 @@
 package at.favre.lib.crypto.bkdf;
 
 import at.favre.lib.bytes.Bytes;
-import at.favre.lib.crypto.HKDF;
 import org.junit.Test;
 
 import static org.junit.Assert.assertArrayEquals;
@@ -11,7 +10,7 @@ public class KeyDerivationFunctionTest {
 
     @Test
     public void testBasicKdf() {
-        KeyDerivationFunction kdf = new KeyDerivationFunction.Default(HKDF.fromHmacSha256(), false);
+        KeyDerivationFunction kdf = new KeyDerivationFunction.Default(Version.HKDF_HMAC512);
 
         char[] pw = "secret".toCharArray();
         int logRounds = 6;

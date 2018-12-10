@@ -1,8 +1,5 @@
 package at.favre.lib.crypto.bkdf;
 
-import at.favre.lib.bytes.Bytes;
-import at.favre.lib.crypto.HKDF;
-
 import java.security.SecureRandom;
 
 public final class BKDF {
@@ -11,10 +8,27 @@ public final class BKDF {
     }
 
     public static PasswordHasher createPasswordHasher() {
-        return new PasswordHasher.Default((byte) Bytes.from((byte) 64).toUnsignedByte(), HKDF.fromHmacSha256(), new SecureRandom(), false);
+        return createPasswordHasher(Version.HKDF_HMAC512_BCRYPT_24_BYTE, new SecureRandom());
+    }
+
+    public static PasswordHasher createPasswordHasher(Version version) {
+        return createPasswordHasher(version, new SecureRandom());
+    }
+
+    public static PasswordHasher createPasswordHasher(Version version, SecureRandom secureRandom) {
+        return new PasswordHasher.Default(version, secureRandom);
+    }
+
+    public static PasswordHashVerifier createPasswordHashVerifier(Version version, SecureRandom secureRandom) {
+        return new PasswordHashVerifier.Default();
+    }
+
+    public static KeyDerivationFunction createKdf(Version version) {
+        return new KeyDerivationFunction.Default(version);
     }
 
     public static KeyDerivationFunction createKdf() {
-        return new KeyDerivationFunction.Default(HKDF.fromHmacSha256(), false);
+        return createKdf(Version.HKDF_HMAC512_BCRYPT_24_BYTE);
     }
+
 }

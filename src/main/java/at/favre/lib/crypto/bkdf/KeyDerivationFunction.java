@@ -16,9 +16,9 @@ public interface KeyDerivationFunction {
         private final HKDF hkdf;
         private final boolean useOnly23ByteBcryptOut;
 
-        public Default(HKDF hkdf, boolean useOnly23ByteBcryptOut) {
-            this.hkdf = hkdf;
-            this.useOnly23ByteBcryptOut = useOnly23ByteBcryptOut;
+        public Default(Version version) {
+            this.hkdf = version.getHkdf();
+            this.useOnly23ByteBcryptOut = version.isUseOnly23ByteBcryptOut();
         }
 
         @Override
