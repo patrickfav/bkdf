@@ -30,12 +30,21 @@ public interface PasswordHashVerifier {
      * Default implementation
      */
     final class Default implements PasswordHashVerifier {
-        @Override
-        public boolean verify(char[] password, String bkdfRefenceHash) {
-            HashData hashData = HashData.parse(bkdfRefenceHash);
-            return verify(password, hashData);
+        private final PasswordHashUpgrader passwordHashUpgrader;
+
+        public Default(PasswordHashUpgrader passwordHashUpgrader) {
+            this.passwordHashUpgrader = passwordHashUpgrader;
         }
 
+        @Override
+        public boolean verify(char[] password, String bkdfRefenceHash) {
+            if (passwordHashUpgrader.isCompoundHashMessage(bkdfRefenceHash)) {
+                return passwordHashUpgrader.verifyCompoundHash(password, bkdfRefenceHash);
+            } else {
+                HashData hashData = HashData.parse(bkdfRefenceHash);
+                return verify(password, hashData);
+            }
+        }
 
         @Override
         public boolean verify(char[] password, HashData bkdfPasswordHashFormat1) {

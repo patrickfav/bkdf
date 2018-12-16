@@ -136,14 +136,13 @@ public class PasswordHasherTest {
         String hash = hasher.hash(pw, logRounds);
         System.out.println(hash);
 
-
-        PasswordHashVerifier verifier = new PasswordHashVerifier.Default();
+        PasswordHashVerifier verifier = BKDF.createPasswordHashVerifier();
         assertTrue(verifier.verify(pw, hash));
     }
 
     @Test
     public void testVerifyReferenceTest() {
-        PasswordHashVerifier verifier = new PasswordHashVerifier.Default();
+        PasswordHashVerifier verifier = BKDF.createPasswordHashVerifier();
 
         for (TestCase testCase : testCases) {
             verifier.verify(testCase.password, testCase.hash);

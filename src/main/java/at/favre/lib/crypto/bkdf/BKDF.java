@@ -20,7 +20,15 @@ public final class BKDF {
     }
 
     public static PasswordHashVerifier createPasswordHashVerifier() {
-        return new PasswordHashVerifier.Default();
+        return new PasswordHashVerifier.Default(createPasswordHashUpgrader());
+    }
+
+    public static PasswordHashUpgrader createPasswordHashUpgrader() {
+        return createPasswordHashUpgrader(new SecureRandom());
+    }
+
+    public static PasswordHashUpgrader createPasswordHashUpgrader(SecureRandom secureRandom) {
+        return new PasswordHashUpgrader.Default(secureRandom);
     }
 
     public static KeyDerivationFunction createKdf(Version version) {

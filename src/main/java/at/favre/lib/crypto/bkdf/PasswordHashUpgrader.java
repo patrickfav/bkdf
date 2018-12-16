@@ -2,14 +2,20 @@ package at.favre.lib.crypto.bkdf;
 
 import at.favre.lib.bytes.Bytes;
 
-import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public interface PasswordHashUpgrader {
-    byte COMPOUND_FORMAT_VERSION = (byte) 0xFF;
+    byte COMPOUND_FORMAT_VERSION = (byte) 0xFE;
 
-    CompoundHashData upgradePasswordHash(Version version, int costFactor, String bkdfPasswordHashFormat2);
+    CompoundHashData upgradePasswordHashBy(Version version, int costFactor, String bkdfPasswordHashFormat2);
+
+    CompoundHashData upgradePasswordHashTo(int costFactor, String bkdfPasswordHashFormat2);
+
+    boolean verifyCompoundHash(char[] password, String bkdfPasswordHashFormat2);
+
+    boolean isCompoundHashMessage(String bkdfPasswordHashFormat2);
 
     final class Default implements PasswordHashUpgrader {
         private final SecureRandom secureRandom;
@@ -19,18 +25,11 @@ public interface PasswordHashUpgrader {
         }
 
         @Override
-        public CompoundHashData upgradePasswordHash(Version version, int costFactor, String bkdfPasswordHashFormat2) {
-            byte[] blobMsg = Bytes.parseBase64(bkdfPasswordHashFormat2).array();
+        public CompoundHashData upgradePasswordHashBy(Version version, int costFactor, String bkdfPasswordHashFormat2) {
+            CompoundHashData compoundHashData = createHashData(bkdfPasswordHashFormat2);
 
-            CompoundHashData compoundHashData;
-            if (blobMsg[0] == COMPOUND_FORMAT_VERSION) {
-                compoundHashData = parse(blobMsg);
-            } else {
-                compoundHashData = CompoundHashData.from(HashData.parse(blobMsg));
-            }
-
-            List<HashConfig> newConfigList = new ArrayList<>(compoundHashData.hashConfigList);
-            newConfigList.add(new HashConfig(version, (byte) costFactor));
+            List<CompoundHashData.HashConfig> newConfigList = new ArrayList<>(compoundHashData.hashConfigList);
+            newConfigList.add(new CompoundHashData.HashConfig(version, (byte) costFactor));
 
             PasswordHasher.Default hasher = new PasswordHasher.Default(version, secureRandom);
             byte[] upgradedHash = hasher.hashRaw(compoundHashData.rawHash, compoundHashData.rawSalt, costFactor).rawHash;
@@ -38,7 +37,82 @@ public interface PasswordHashUpgrader {
             return new CompoundHashData(newConfigList, compoundHashData.rawSalt, upgradedHash);
         }
 
-        public byte[] createCompoundHashMessage(List<HashConfig> hashConfigs, byte[] salt, char[] password) {
+        private CompoundHashData createHashData(String bkdfPasswordHashFormat2) {
+            byte[] blobMsg = Bytes.parseBase64(bkdfPasswordHashFormat2).array();
+
+            CompoundHashData compoundHashData;
+            if (blobMsg[0] == COMPOUND_FORMAT_VERSION) {
+                compoundHashData = CompoundHashData.parse(blobMsg);
+            } else {
+                compoundHashData = CompoundHashData.from(HashData.parse(blobMsg));
+            }
+            return compoundHashData;
+        }
+
+        @Override
+        public CompoundHashData upgradePasswordHashTo(int costFactor, String bkdfPasswordHashFormat2) {
+            CompoundHashData data = createHashData(bkdfPasswordHashFormat2);
+            List<Integer> currentCostList = new ArrayList<>(data.hashConfigList.size());
+            for (CompoundHashData.HashConfig config : data.hashConfigList) {
+                currentCostList.add((int) config.cost);
+            }
+            List<Integer> sequence = calcUpgradeSeq(currentCostList, costFactor);
+            Version usedVersion = data.hashConfigList.get(data.hashConfigList.size() - 1).version;
+
+            List<CompoundHashData.HashConfig> newConfigList = new ArrayList<>(data.hashConfigList);
+            byte[] upgradedHash = data.rawHash;
+            PasswordHasher.Default hasher = new PasswordHasher.Default(usedVersion, secureRandom);
+
+            for (Integer seqCf : sequence) {
+                upgradedHash = hasher.hashRaw(upgradedHash, data.rawSalt, seqCf).rawHash;
+                newConfigList.add(new CompoundHashData.HashConfig(usedVersion, seqCf.byteValue()));
+            }
+
+            return new CompoundHashData(newConfigList, data.rawSalt, upgradedHash);
+        }
+
+        List<Integer> calcUpgradeSeq(List<Integer> fromCostFactor, int toCostFactor) {
+            List<Integer> sequence = new ArrayList<>();
+            long currentIterations = 0;
+            for (Integer c : fromCostFactor) {
+                currentIterations += (long) Math.pow(2, c);
+            }
+            long targetIterations = (long) Math.pow(2, toCostFactor);
+
+            if (currentIterations >= targetIterations) {
+                throw new IllegalArgumentException("target cost factor must be greater than source cost factor");
+            }
+
+            for (int i = 31; i >= 4; i--) {
+                long iterations = (long) Math.pow(2, i);
+                if (currentIterations + iterations <= targetIterations) {
+                    sequence.add(i);
+                    currentIterations += iterations;
+                    i++;
+                }
+            }
+
+            // System.out.println("target is " + targetIterations + " - current: " + currentIterations);
+
+            return sequence;
+        }
+
+        @Override
+        public boolean verifyCompoundHash(char[] password, String bkdfPasswordHashFormat2) {
+            byte[] blobMsg = Bytes.parseBase64(bkdfPasswordHashFormat2).array();
+            CompoundHashData data = CompoundHashData.parse(blobMsg);
+
+            CompoundHashData referenceHash = calculateCompoundHash(data.hashConfigList, data.rawSalt, password);
+            return Bytes.wrap(data.rawHash).equalsConstantTime(referenceHash.rawHash);
+        }
+
+        @Override
+        public boolean isCompoundHashMessage(String bkdfPasswordHashFormat2) {
+            return bkdfPasswordHashFormat2.startsWith(
+                    Bytes.from(COMPOUND_FORMAT_VERSION).encodeBase64Url().replaceAll("=", ""));
+        }
+
+        private CompoundHashData calculateCompoundHash(List<CompoundHashData.HashConfig> hashConfigs, byte[] salt, char[] password) {
             if (hashConfigs.size() < 1) {
                 throw new IllegalArgumentException("must be at least a single hash config");
             }
@@ -46,144 +120,13 @@ public interface PasswordHashUpgrader {
                 throw new IllegalArgumentException("no more than 255 configs allowed");
             }
 
-            boolean hashOnly23Byte = hashConfigs.get(hashConfigs.size() - 1).version.isUseOnly23ByteBcryptOut();
-
-            ByteBuffer buffer = ByteBuffer.allocate(1 + 1 + (hashConfigs.size() * 2) + salt.length + (hashOnly23Byte ? 23 : 24));
-            buffer.put(COMPOUND_FORMAT_VERSION);
-            buffer.put((byte) Bytes.from((byte) hashConfigs.size()).toUnsignedByte());
             byte[] tempHashValue = Bytes.from(password).array();
-            for (HashConfig hashConfig : hashConfigs) {
-                buffer.put(hashConfig.version.getVersionCode());
-                buffer.put(hashConfig.cost);
-
+            for (CompoundHashData.HashConfig hashConfig : hashConfigs) {
                 PasswordHasher.Default hasher = new PasswordHasher.Default(hashConfig.version, secureRandom);
                 tempHashValue = hasher.hashRaw(tempHashValue, salt, hashConfig.cost).rawHash;
             }
 
-            buffer.put(salt);
-            buffer.put(tempHashValue);
-
-            return buffer.array();
-        }
-
-        private CompoundHashData parse(byte[] rawHashMessage) {
-            ByteBuffer b = ByteBuffer.wrap(rawHashMessage);
-            byte version = b.get();
-
-            if (version != COMPOUND_FORMAT_VERSION) {
-                throw new Version.UnsupportedBkdfVersionException(version);
-            }
-
-            int configCount = Bytes.from(b.get()).toUnsignedByte();
-
-            if (configCount == 0) {
-                throw new IllegalArgumentException("there must be at least 1 hash config");
-            }
-
-            List<HashConfig> configList = new ArrayList<>(configCount);
-            for (int i = 0; i < configCount; i++) {
-                Version currentVersion = Version.Util.getByCode(b.get());
-                byte costFactor = b.get();
-                configList.add(new HashConfig(currentVersion, costFactor));
-            }
-
-            byte[] salt = new byte[16];
-            b.get(salt);
-
-            boolean usesOnly23Byte = configList.get(configList.size() - 1)
-                    .version.isUseOnly23ByteBcryptOut();
-            byte[] hash = new byte[usesOnly23Byte ? 23 : 24];
-            b.get(hash);
-
-            if (b.remaining() != 0) {
-                throw new IllegalArgumentException("unexpected bytes remaining in the message");
-            }
-
-            return new CompoundHashData(configList, salt, hash);
-        }
-    }
-
-    final class CompoundHashData {
-        public final List<HashConfig> hashConfigList;
-        public final byte[] rawSalt;
-        public final byte[] rawHash;
-
-        public static CompoundHashData from(HashData hashData) {
-            return new CompoundHashData(Collections.singletonList(new HashConfig(hashData.version, hashData.cost)),
-                    hashData.rawSalt, hashData.rawHash);
-        }
-
-        public CompoundHashData(List<HashConfig> hashConfigList, byte[] rawSalt, byte[] rawHash) {
-            this.hashConfigList = hashConfigList;
-            this.rawSalt = rawSalt;
-            this.rawHash = rawHash;
-        }
-
-        public void wipe() {
-            Bytes.wrapNullSafe(this.rawSalt).mutable().secureWipe();
-            Bytes.wrapNullSafe(this.rawHash).mutable().secureWipe();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            CompoundHashData that = (CompoundHashData) o;
-            return Objects.equals(hashConfigList, that.hashConfigList) &&
-                    Bytes.wrap(rawSalt).equalsConstantTime(that.rawSalt) &&
-                    Bytes.wrap(rawHash).equalsConstantTime(that.rawHash);
-        }
-
-        @Override
-        public int hashCode() {
-            int result = Objects.hash(hashConfigList);
-            result = 31 * result + Arrays.hashCode(rawSalt);
-            result = 31 * result + Arrays.hashCode(rawHash);
-            return result;
-        }
-
-        public byte[] createBlobMessage() {
-            boolean hashOnly23Byte = hashConfigList.get(hashConfigList.size() - 1).version.isUseOnly23ByteBcryptOut();
-            ByteBuffer buffer = ByteBuffer.allocate(1 + 1 + (hashConfigList.size() * 2) + rawSalt.length + (hashOnly23Byte ? 23 : 24));
-            buffer.put(COMPOUND_FORMAT_VERSION);
-            buffer.put((byte) Bytes.from((byte) hashConfigList.size()).toUnsignedByte());
-            for (HashConfig hashConfig : hashConfigList) {
-                buffer.put(hashConfig.version.getVersionCode());
-                buffer.put(hashConfig.cost);
-            }
-
-            buffer.put(rawSalt);
-            buffer.put(rawHash);
-
-            return buffer.array();
-        }
-
-        public String createBase64Message() {
-            return Bytes.wrap(createBlobMessage()).encodeBase64Url();
-        }
-    }
-
-    final class HashConfig {
-        public final Version version;
-        public final byte cost;
-
-        public HashConfig(Version version, byte cost) {
-            this.version = version;
-            this.cost = cost;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            HashConfig that = (HashConfig) o;
-            return cost == that.cost &&
-                    Objects.equals(version, that.version);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(version, cost);
+            return new CompoundHashData(hashConfigs, salt, tempHashValue);
         }
     }
 }
