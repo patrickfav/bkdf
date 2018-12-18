@@ -3,19 +3,41 @@ package at.favre.lib.crypto.bkdf;
 import at.favre.lib.bytes.Bytes;
 
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
+/**
+ * A data format encapsulating possible multiple hash configs which were applied to given hash.
+ */
 @SuppressWarnings("WeakerAccess")
 public final class CompoundHashData {
     public final List<HashConfig> hashConfigList;
     public final byte[] rawSalt;
     public final byte[] rawHash;
 
+    /**
+     * Convert normal hash data to compound format
+     *
+     * @param hashData to convert
+     * @return compound format
+     */
     public static CompoundHashData from(HashData hashData) {
         return new CompoundHashData(Collections.singletonList(new HashConfig(hashData.version, hashData.cost)),
                 hashData.rawSalt, hashData.rawHash);
     }
 
+    /**
+     * Parse given raw blob hash message in compound format and returns this data model.
+     * <p>
+     * See {@link CompoundHashData#createBlobMessage()}.
+     *
+     * @param rawHashMessage to parse
+     * @return new instance
+     * @throws Version.UnsupportedBkdfVersionException if version identifier is not compound type
+     */
     public static CompoundHashData parse(byte[] rawHashMessage) {
         ByteBuffer b = ByteBuffer.wrap(rawHashMessage);
         byte version = b.get();
@@ -58,9 +80,54 @@ public final class CompoundHashData {
         this.rawHash = rawHash;
     }
 
+    /**
+     * Wipes salt and hash internally.
+     * This instance cannot be used after calling wipe.
+     */
     public void wipe() {
         Bytes.wrapNullSafe(this.rawSalt).mutable().secureWipe();
         Bytes.wrapNullSafe(this.rawHash).mutable().secureWipe();
+    }
+
+    /**
+     * Create the serialized message in raw byte array / blob format.
+     * <p>
+     * The format is
+     *
+     * <code>V L CC CC CC CC ... SSSSSSSSSSSSSSSS HHHHHHHHHHHHHHHH</code>
+     * <ul>
+     * <li>V: the version byte</li>
+     * <li>L: unsigned byte of count of hash configs (each 2 byte)</li>
+     * <li>CC: 2 byte of bkdf version byte and cost factor</li>
+     * <li>S: 16 byte salt</li>
+     * <li>H: 23/24 byte hash</li>
+     * </ul>
+     *
+     * @return blob message
+     */
+    public byte[] createBlobMessage() {
+        boolean hashOnly23Byte = hashConfigList.get(hashConfigList.size() - 1).version.isUseOnly23ByteBcryptOut();
+        ByteBuffer buffer = ByteBuffer.allocate(1 + 1 + (hashConfigList.size() * 2) + rawSalt.length + (hashOnly23Byte ? 23 : 24));
+        buffer.put(PasswordHashUpgrader.COMPOUND_FORMAT_VERSION);
+        buffer.put((byte) Bytes.from((byte) hashConfigList.size()).toUnsignedByte());
+        for (HashConfig hashConfig : hashConfigList) {
+            buffer.put(hashConfig.version.getVersionCode());
+            buffer.put(hashConfig.cost);
+        }
+
+        buffer.put(rawSalt);
+        buffer.put(rawHash);
+
+        return buffer.array();
+    }
+
+    /**
+     * Similar to {@link CompoundHashData#createBlobMessage()} but returns as Base64 url-encoded string
+     *
+     * @return base64-url encoded string
+     */
+    public String createBase64Message() {
+        return Bytes.wrap(createBlobMessage()).encodeBase64Url();
     }
 
     @Override
@@ -79,26 +146,6 @@ public final class CompoundHashData {
         result = 31 * result + Arrays.hashCode(rawSalt);
         result = 31 * result + Arrays.hashCode(rawHash);
         return result;
-    }
-
-    public byte[] createBlobMessage() {
-        boolean hashOnly23Byte = hashConfigList.get(hashConfigList.size() - 1).version.isUseOnly23ByteBcryptOut();
-        ByteBuffer buffer = ByteBuffer.allocate(1 + 1 + (hashConfigList.size() * 2) + rawSalt.length + (hashOnly23Byte ? 23 : 24));
-        buffer.put(PasswordHashUpgrader.COMPOUND_FORMAT_VERSION);
-        buffer.put((byte) Bytes.from((byte) hashConfigList.size()).toUnsignedByte());
-        for (HashConfig hashConfig : hashConfigList) {
-            buffer.put(hashConfig.version.getVersionCode());
-            buffer.put(hashConfig.cost);
-        }
-
-        buffer.put(rawSalt);
-        buffer.put(rawHash);
-
-        return buffer.array();
-    }
-
-    public String createBase64Message() {
-        return Bytes.wrap(createBlobMessage()).encodeBase64Url();
     }
 
     public static final class HashConfig {

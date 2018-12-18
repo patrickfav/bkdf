@@ -2,6 +2,9 @@ package at.favre.lib.crypto.bkdf;
 
 import java.security.SecureRandom;
 
+/**
+ * Main entry point of the BKDF API
+ */
 public final class BKDF {
 
     private BKDF() {

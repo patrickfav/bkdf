@@ -33,7 +33,7 @@ public class PasswordHashUpgraderTest {
         assertTrue(verifier.verify(pw, hash));
 
         CompoundHashData compoundHashData =
-                upgrader.upgradePasswordHashBy(Version.HKDF_HMAC512_BCRYPT_24_BYTE, 6, hash);
+                upgrader.upgradePasswordHashWith(Version.HKDF_HMAC512_BCRYPT_24_BYTE, 6, hash);
 
         assertTrue(upgrader.verifyCompoundHash(pw, compoundHashData.createBase64Message()));
         System.out.println(Bytes.wrap(compoundHashData.createBlobMessage()).encodeHex(true));
@@ -51,11 +51,11 @@ public class PasswordHashUpgraderTest {
         String hash = hasher.hash(pw, logRounds);
 
         CompoundHashData compoundHashData =
-                upgrader.upgradePasswordHashBy(Version.HKDF_HMAC512_BCRYPT_24_BYTE, 6, hash);
-        compoundHashData = upgrader.upgradePasswordHashBy(Version.HKDF_HMAC512, 5, compoundHashData.createBase64Message());
+                upgrader.upgradePasswordHashWith(Version.HKDF_HMAC512_BCRYPT_24_BYTE, 6, hash);
+        compoundHashData = upgrader.upgradePasswordHashWith(Version.HKDF_HMAC512, 5, compoundHashData.createBase64Message());
         assertTrue(upgrader.verifyCompoundHash(pw, compoundHashData.createBase64Message()));
 
-        compoundHashData = upgrader.upgradePasswordHashBy(Version.HKDF_HMAC512, 4, compoundHashData.createBase64Message());
+        compoundHashData = upgrader.upgradePasswordHashWith(Version.HKDF_HMAC512, 4, compoundHashData.createBase64Message());
         assertTrue(upgrader.verifyCompoundHash(pw, compoundHashData.createBase64Message()));
 
         System.out.println(compoundHashData.createBase64Message());
@@ -116,6 +116,28 @@ public class PasswordHashUpgraderTest {
         CompoundHashData compoundHashData = upgrader.upgradePasswordHashTo(6, hash);
 
         assertTrue(upgrader.verifyCompoundHash(pw, compoundHashData.createBase64Message()));
+        System.out.println(Bytes.wrap(compoundHashData.createBlobMessage()).encodeHex(true));
+    }
+
+    @Test
+    public void testMultipleUpgradeTo() {
+        PasswordHasher hasher = new PasswordHasher.Default(Version.HKDF_HMAC512, new SecureRandom());
+        char[] pw = "secret".toCharArray();
+        int logRounds = 5;
+
+        String hash = hasher.hash(pw, logRounds);
+        System.out.println(hash);
+
+        PasswordHashVerifier verifier = BKDF.createPasswordHashVerifier();
+        assertTrue(verifier.verify(pw, hash));
+
+        CompoundHashData compoundHashData = upgrader.upgradePasswordHashTo(6, hash);
+
+        assertTrue(verifier.verify(pw, compoundHashData.createBase64Message()));
+        System.out.println(Bytes.wrap(compoundHashData.createBlobMessage()).encodeHex(true));
+
+        compoundHashData = upgrader.upgradePasswordHashTo(8, hash);
+        assertTrue(verifier.verify(pw, compoundHashData.createBase64Message()));
         System.out.println(Bytes.wrap(compoundHashData.createBlobMessage()).encodeHex(true));
     }
 }

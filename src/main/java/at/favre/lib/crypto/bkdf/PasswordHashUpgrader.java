@@ -6,17 +6,82 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Component responsible for upgrading the strength of BKDF password hashes.
+ * <p>
+ * Unfortunately it is not easily possible to upgrade the strength of a bcrypt hash WITHOUT the knowledge of the user password. There are
+ * usually 2 approaches:
+ * <ul>
+ * <li>Recompute the hash when the user signs in next time</li>
+ * <li>Recompute all hashes offline at once</li>
+ * </ul>
+ * <p>
+ * The disadvantage of the first approach is that the weak hashes remain in the DB until a user logs in again, which may be days, weeks or never.
+ * <p>
+ * This class introduces an easy way to to support the second approach by providing a defined protocol and data format for hash upgrading by
+ * chaining bcrypt hashes.
+ * <p>
+ * See
+ * - https://security.stackexchange.com/questions/15847/is-it-possible-to-increase-the-cost-of-bcrypt-or-pbkdf2-when-its-already-calcula
+ * - https://crypto.stackexchange.com/questions/3003/do-i-have-to-recompute-all-hashes-if-i-change-the-work-factor-in-bcrypt
+ */
 public interface PasswordHashUpgrader {
+    /**
+     * The current version identifier for the compound hash data format (see {@link CompoundHashData})
+     */
     byte COMPOUND_FORMAT_VERSION = (byte) 0xFE;
 
-    CompoundHashData upgradePasswordHashBy(Version version, int costFactor, String bkdfPasswordHashFormat2);
+    /**
+     * Upgrades the given hash <strong>with</strong> the given new hash config (ie. version and cost factor).
+     * <p>
+     * This will chain the current hash with given hash exactly as defined by the the input paramters. E.g.
+     * if the current hash is <code>[(VERSION_1, 4)]</code> and the the following will be passed: (VERSION_2, 10), the resulting
+     * hash config is <code>[(VERSION_1, 4), (VERSION_2, 10)]</code>.
+     *
+     * @param version                 of the BKDF password hash to be used
+     * @param costFactor              to be used on the current hash
+     * @param bkdfPasswordHashFormat2 the current hash. Can be in compound or normal password hash format
+     * @return upgraded hash data
+     */
+    CompoundHashData upgradePasswordHashWith(Version version, int costFactor, String bkdfPasswordHashFormat2);
 
+    /**
+     * Upgrades the given hash <strong>to</strong> the given new cost factor.
+     * <p>
+     * This will chain the current hash with possibly multiple hash configs to achieve the new final cost factor. E.g. if current cost-factor
+     * is 5 and new cost-factor should be 7, the following sequence of hashes will be applied: <code>5 + [5, 6]</code>. Note that cost-factor
+     * is seen as <code>2^cost-factor</code> therefore 5 equals 32 iterations and 7, 128 iterations.
+     *
+     * @param costFactor              to be the new final cost factor
+     * @param bkdfPasswordHashFormat2 the current hash. Can be in compound or normal password hash format
+     * @return upgraded hash data
+     */
     CompoundHashData upgradePasswordHashTo(int costFactor, String bkdfPasswordHashFormat2);
 
+    /**
+     * Verify a hash in compound format.
+     * <p>
+     * See also {@link CompoundHashData} and {@link PasswordHashVerifier#verify(char[], HashData)}.
+     *
+     * @param password                to verify against
+     * @param bkdfPasswordHashFormat2 containing the hash data
+     * @return true iff bcrypt hash in bkdfPasswordHashFormat2 can be computed with given user password
+     */
     boolean verifyCompoundHash(char[] password, String bkdfPasswordHashFormat2);
 
+    /**
+     * Efficently checks a base64 string if it is in compound hash data format.
+     * <p>
+     * See {@link #COMPOUND_FORMAT_VERSION} and {@link CompoundHashData}
+     *
+     * @param bkdfPasswordHashFormat2 to possible be in compound hash format
+     * @return iff given data has the version identifier of a compound format
+     */
     boolean isCompoundHashMessage(String bkdfPasswordHashFormat2);
 
+    /**
+     * Default implementation
+     */
     final class Default implements PasswordHashUpgrader {
         private final SecureRandom secureRandom;
 
@@ -25,7 +90,7 @@ public interface PasswordHashUpgrader {
         }
 
         @Override
-        public CompoundHashData upgradePasswordHashBy(Version version, int costFactor, String bkdfPasswordHashFormat2) {
+        public CompoundHashData upgradePasswordHashWith(Version version, int costFactor, String bkdfPasswordHashFormat2) {
             CompoundHashData compoundHashData = createHashData(bkdfPasswordHashFormat2);
 
             List<CompoundHashData.HashConfig> newConfigList = new ArrayList<>(compoundHashData.hashConfigList);
@@ -71,6 +136,14 @@ public interface PasswordHashUpgrader {
             return new CompoundHashData(newConfigList, data.rawSalt, upgradedHash);
         }
 
+        /**
+         * Calculates a possible upgrade path from current hashes to achieve a new target hash. Eg. given the work factor of 5 (=32) and a
+         * target of 8 (=256), a path of [5, 6, 7] would be required to achieve 256 iterations.
+         *
+         * @param fromCostFactor current hash config
+         * @param toCostFactor   target strength
+         * @return hash configs required to achieve toCostFactor
+         */
         List<Integer> calcUpgradeSeq(List<Integer> fromCostFactor, int toCostFactor) {
             List<Integer> sequence = new ArrayList<>();
             long currentIterations = 0;
@@ -91,8 +164,6 @@ public interface PasswordHashUpgrader {
                     i++;
                 }
             }
-
-            // System.out.println("target is " + targetIterations + " - current: " + currentIterations);
 
             return sequence;
         }
