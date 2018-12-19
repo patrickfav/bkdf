@@ -8,7 +8,6 @@ import java.util.Arrays;
 import java.util.Objects;
 
 /**
- * +
  * Model containing all the parts required for the "BKDF Password Hash Message Format"
  */
 @SuppressWarnings("WeakerAccess")
