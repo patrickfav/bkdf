@@ -99,7 +99,7 @@ public interface PasswordHashUpgrader {
 
             PasswordHasher.Default hasher = new PasswordHasher.Default(version, secureRandom);
             byte[] upgradedHash = hasher.hashRaw(compoundHashData.rawHash,
-                    deriveSalt(newConfigList.size() - 1, compoundHashData.rawSalt, version.getVersionCode(), (byte) costFactor),
+                    deriveSalt(newConfigList.size() - 1, compoundHashData.rawSalt, version.getVersionCode(), (byte) costFactor, compoundHashData.rawHash),
                     costFactor).rawHash;
 
             return new CompoundHashData(newConfigList, compoundHashData.rawSalt, upgradedHash);
@@ -109,7 +109,7 @@ public interface PasswordHashUpgrader {
          * Derives salt according to password upgrade protocol:
          * <ul>
          * <li>If counter 0: return salt</li>
-         * <li>If counter 1+: return hkdf_expand(salt, 4-byte-counter | 1-byte-version_code | 1-byte-cost_factor, 16) with HMAC_SHA512</li>
+         * <li>If counter 1+: return hkdf_expand(salt, 4-byte-counter | 1-byte-version_code | 1-byte-cost_factor| prev-bcrypt-hash, 16) with HMAC_SHA512</li>
          * </ul>
          *
          * @param counter     of the current chained hash, e.g. if 4 configs are chained, the counter will go from 0-3
@@ -118,11 +118,11 @@ public interface PasswordHashUpgrader {
          * @param costFactor  of the currently used password hash, see {@link CompoundHashData.Config#cost}
          * @return correct derived salt for this round
          */
-        private byte[] deriveSalt(int counter, byte[] salt, byte versionCode, byte costFactor) {
+        private byte[] deriveSalt(int counter, byte[] salt, byte versionCode, byte costFactor, byte[] previousHash) {
             if (counter == 0) {
                 return salt;
             } else {
-                return HKDF.fromHmacSha512().expand(salt, Bytes.from(counter).append(versionCode).append(costFactor).array(), 16);
+                return HKDF.fromHmacSha512().expand(salt, Bytes.from(counter).append(versionCode).append(costFactor).append(previousHash).array(), 16);
             }
         }
 
@@ -155,7 +155,7 @@ public interface PasswordHashUpgrader {
             for (Integer seqCf : sequence) {
                 newConfigList.add(new CompoundHashData.Config(usedVersion, seqCf.byteValue()));
                 upgradedHash = hasher.hashRaw(upgradedHash,
-                        deriveSalt(newConfigList.size() - 1, data.rawSalt, usedVersion.getVersionCode(), seqCf.byteValue()),
+                        deriveSalt(newConfigList.size() - 1, data.rawSalt, usedVersion.getVersionCode(), seqCf.byteValue(), upgradedHash),
                         seqCf).rawHash;
             }
 
@@ -222,7 +222,7 @@ public interface PasswordHashUpgrader {
             for (CompoundHashData.Config config : configs) {
                 PasswordHasher.Default hasher = new PasswordHasher.Default(config.version, secureRandom);
                 tempHashValue = hasher.hashRaw(tempHashValue,
-                        deriveSalt(counter++, salt, config.version.getVersionCode(), config.cost),
+                        deriveSalt(counter++, salt, config.version.getVersionCode(), config.cost, tempHashValue),
                         config.cost).rawHash;
             }
 

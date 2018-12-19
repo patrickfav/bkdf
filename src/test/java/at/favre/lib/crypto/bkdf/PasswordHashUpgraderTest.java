@@ -200,64 +200,64 @@ public class PasswordHashUpgraderTest {
     }
 
     private final TestCaseUpgrader[] testCasesUpgradeCount1 = new TestCaseUpgrader[]{
-            new TestCaseUpgrader("a".toCharArray(), "_gICBQEGUoga3E7nC3OzD_IDzC8SqtWhqML1hS2vDjfYLs3-Vjx2yVy1la3q"),
-            new TestCaseUpgrader("aa".toCharArray(), "_gICBgIEXhNPJ-aMnEibCb1DF4jFNwWwfhekcn042KsSxSFquljj8ayX0WlcmQ=="),
-            new TestCaseUpgrader("aaa".toCharArray(), "_gICBQEGl_qyN0QmZgBOQuXiNJUuUv_3Sm0080k2kHRfpbZdsUugkKBN0ksS"),
-            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gIBBAEEONFeCTNFRTaWmeixx0_Mo8zNmSvBCLQoSUSf_umcGWTmS1042S3_"),
-            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gIBBAIE_bUfgdT8kz8uJfQKguyWXxd_o9jObnWi6cpg4dSLSvABZ7P075qUeQ=="),
-            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gICBQEF0fD8K8k0JPeNbGNMUl0Me2VVTCIgVza5p-mEAJ-3BK98Ut_tadL0"),
-            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gICBgIGbKEYY-0lra5nzdqYo94yVftMm7E7kgyFUVhmWmVdY_tPyh2g8W6rIw=="),
+            new TestCaseUpgrader("a".toCharArray(), "_gICBgIGMmzXWMB0p6h1cglNl5Dll1gW0Ja4_tJT4UMH2cE9fAP22om81EC6FA=="),
+            new TestCaseUpgrader("aa".toCharArray(), "_gICBAEEc0TndxyDo8W-dGfnQOGfCvTwh5SLfV-LVh7IWeeIb8pGoVriG0w3"),
+            new TestCaseUpgrader("aaa".toCharArray(), "_gIBBQIFG-R1joJ_nOS14WYawM8fSa-5RugB6X4eCUnnbfOf1HNwCrKwmBqfjg=="),
+            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gICBAIFaYPui6vQQMgMrmjhdZkbropYPQKtLa1HekBK9nQjNh_ECJbd16fRHQ=="),
+            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gIBBQEEqvBzVD7eH2w3C0pn6lLy0_JnCFH6P8onrSBpXlItlgz-9BiHY127"),
+            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gICBgIEJ5tJ9Dqib3OnvecLrnmihtHQcSAUIb0pFyIh4HDtNVQllwBf_CWH9g=="),
+            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gICBQEFfYoSazmNuEVXjlmHeXJMnJIY-lAa7jbBvH3R5ssvDYkEVEUw0ZHv")
     };
 
     @Test
-    public void testVerifyReferenceTestUpgradeCount1() {
+    public void testVerifyReferenceTestUpgradeCount01() {
         for (TestCaseUpgrader testCase : testCasesUpgradeCount1) {
             assertTrue(verifier.verify(testCase.password, testCase.hash));
         }
     }
 
     private final TestCaseUpgrader[] testCasesUpgradeCount2 = new TestCaseUpgrader[]{
-            new TestCaseUpgrader("a".toCharArray(), "_gMBBQIFAQZ6xH0X_SusDcQCSCxa69C_wEEQI07LWf7SXNXXubwJ-61n-5oo_-s="),
-            new TestCaseUpgrader("aa".toCharArray(), "_gMCBQIEAgRRz-2YbXFDQyAPG95kRwZRTD_UnMctxO8lyIDUdrETTgz_qoMcP42M"),
-            new TestCaseUpgrader("aaa".toCharArray(), "_gMCBgEGAQaZcYu2vhJ0lnNUA6gAAkGd-j6xB69LrQH1vaIBqM43OONe4YBq2qU="),
-            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gMBBgIFAgZSQ55dvwwSIWUIjvpIPp-tzmY95juGPxYctyLLxk6gNxRUaTLceuQ1"),
-            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gMCBgIEAgQUUAlXgtF1Wwpfe0jV0uJCvNWexkZWsUt2d1izQDz-lx2ehPmc52sG"),
-            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gMCBgIGAQWdNrQu0CFfzh7U0NoDbiDNq4D6kTke6fj3onNoy66dgT7LUrBdjXc="),
-            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gMCBQEEAgXXNWyCMDzFywabNGC94HjWk_-uYztXSrnTkArV8Wg7sq8rebcwuI99")
+            new TestCaseUpgrader("a".toCharArray(), "_gMCBgEGAgTTdwEnbwH4hnM2zuwjbG-u5kuMkZkIcQ9GZTV3935nBlTE0NSGebvD"),
+            new TestCaseUpgrader("aa".toCharArray(), "_gMBBgIGAgZQS02c8Li4MDJexcalrejoLZo-J8CznNgpmL96VuV2alMRkEBDOQs6"),
+            new TestCaseUpgrader("aaa".toCharArray(), "_gMBBQIFAgYAYb4IqohRz7RS1wy6Cn6UTad-piBBk5DgV7WH-Zk28Aee1uXPZye2"),
+            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gMCBQEGAgYgC-NQR9tIR1J_NWuVjdADtpXrX2vjaFcw7Q0IoL2gUoEoyYu4c32z"),
+            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gMBBQEEAgXXFVvm1H2bXFfF2ZAD8olgREGXAONsW6BM90C4YbX88SDWLUY_UBHP"),
+            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gMCBAEGAgZtY5_u6GhhzyS-l0j3RV6lkW_8Rs9wJjoT_fTaMTMU1fY2kCSaACFA"),
+            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gMCBAEGAgWdRFx6yD8wqOhKUD96JauZ9CgaB8hQzrNENo0RIm17A8utDJw1kVAj")
     };
 
     @Test
-    public void testVerifyReferenceTestUpgradeCount2() {
+    public void testVerifyReferenceTestUpgradeCount02() {
         for (TestCaseUpgrader testCase : testCasesUpgradeCount2) {
             assertTrue(verifier.verify(testCase.password, testCase.hash));
         }
     }
 
     private final TestCaseUpgrader[] testCasesUpgradeCount4 = new TestCaseUpgrader[]{
-            new TestCaseUpgrader("a".toCharArray(), "_gUBBQEEAgQCBgEGgCrrUwkGLj9O_xFGMeuXNey6w8rFyOZnjRVxKJv4Bruyji5rsK6V"),
-            new TestCaseUpgrader("aa".toCharArray(), "_gUBBQEEAQYBBQEGb_oflUTXNK53qE_TLiqhnRkqhpnQ0pKg3i6oUDF6ufy_3vbvzgnF"),
-            new TestCaseUpgrader("aaa".toCharArray(), "_gUBBgEFAQUCBgEG1dHDEQLZUXrz162JQPBEKBDj9FAgvpRUw-ZAq8fOFju2WUFcDhq0"),
-            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gUCBQIEAQYCBQIFAbW4j1ck0ECYEOveSnnrFMGnqfkif8UYSOlx6ZAyKb0PYKL-AskXhw=="),
-            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gUBBgIEAQYBBgEE2eEBwLSKWf1-JdMGuDD65jxi95WHs_bm65a_fADuBlFSVbtgQ_lo"),
-            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gUCBgIGAgUBBAEFz_gn8vxRq07mcsAqFeibpuc9htNJjMEi3_gUKmrYYif_Tv1c9ni4"),
-            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gUBBAEFAQYCBQIG3rCRJaSNzijIQqXavmHiWiOjgfKhfr_1rQ2zLHNfKyx8-LYKUt2cEw==")
+            new TestCaseUpgrader("a".toCharArray(), "_gUBBQIEAgUCBAIF-efUpaDmuMPhzJLjzL7rX-49f4P7zSvZXtKHVoXTM5F4dHyg8uFbdw=="),
+            new TestCaseUpgrader("aa".toCharArray(), "_gUCBQIGAgYCBAEFcdvO8pgHahT30RwDHfse5sBqo0P5YfwP4-kEidMrxD9D2aeh5OYq"),
+            new TestCaseUpgrader("aaa".toCharArray(), "_gUBBAEFAgYCBQEFmE509eyho6H4hMSMwVnR3AgN3ejr62VifmGNnIxhKsC4lZM1Vm_W"),
+            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gUBBQEGAgQCBAEFulO8UeiGlcSky55THbcFTPTq_HhspStajs0VCp98N9g7VI2ewh_p"),
+            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gUBBgEGAgYCBQIGrRozL_vsm2mk5JpzSzEbM0tAF5mDY2HzDQt5tloh553378KFfrc9Dw=="),
+            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gUCBgEFAgUBBAIFL4ZQ7--KJY6onkb5FoTWUGHdLreFgg21xk-_UsnKu9x1DrzMFq6-bQ=="),
+            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gUCBAEFAgQCBgEGBOLBIBOxhdT_C_RtHTGwG_SyjpFxfejGEONQLzLAj3aHXo5n-lXV")
     };
 
     @Test
-    public void testVerifyReferenceTestUpgradeCount4() {
+    public void testVerifyReferenceTestUpgradeCount04() {
         for (TestCaseUpgrader testCase : testCasesUpgradeCount4) {
             assertTrue(verifier.verify(testCase.password, testCase.hash));
         }
     }
 
     private final TestCaseUpgrader[] testCasesUpgradeCount10 = new TestCaseUpgrader[]{
-            new TestCaseUpgrader("a".toCharArray(), "_gsBBAEGAQQCBQEEAQYCBgEEAQQCBQIGypXPPirdTVL5dQzOkoReYhnbDRAldaeTCRzbCaUJhRuYzkxAFV-wdA=="),
-            new TestCaseUpgrader("aa".toCharArray(), "_gsBBgIGAQUBBQIFAQYBBAEEAQUBBAEFtlTAimutubnVn2H1Xc4TTVl4vhZSQWNVm7z1RMK6LrXlZtyFT9G-"),
-            new TestCaseUpgrader("aaa".toCharArray(), "_gsBBAEGAgQBBgEGAQUBBAIGAQQCBgIGdz8HhBsK6gfMFbNABsFu5K1SGJC6hfOA2S06bJ1djPq1d0fv1XgoUQ=="),
-            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gsCBQEEAgUBBQIFAgQCBQIFAgQCBQEFdMUGhqiHkPw7PGkdZGzZL9FjYJhpMouhR6YV_W2El5MJDCFdhvuI"),
-            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gsCBgIFAgUBBgIGAgYCBQEFAQUBBQEGc3u9eXCxjSuPV2gYgb6sYdWH3Rm-gyTpvs5TQ_sQqTAuhR_6L-_A"),
-            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gsBBgIGAQQCBQEEAQYBBAIGAgQBBgIGDQVuk2F5LOYg68ivD7kOUA0uYcVTo9MdziF6ax8WstKwGLPcLdBveQ=="),
-            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gsCBgEEAQYBBQIGAQYBBQIFAQQBBQIFHZ_tuFTbcYR-1pQkRbTnKHAuzv7BYcGHPttG5bvOvIJpxMxQVnBONw==")
+            new TestCaseUpgrader("a".toCharArray(), "_gsCBAEGAQUCBQIGAgYCBAEEAgYBBgIElk7nGCjZKZ3zs3kLArWHkKWUzKES_UJZAIvIHKoSARe14VPU6WEIRg=="),
+            new TestCaseUpgrader("aa".toCharArray(), "_gsBBgEEAQQBBgIGAgUBBAIFAQQCBAEEYAZ0JMwhQ9nZhcij7wVbLKgM5KE_ilaX9bu6PRR3bpK6kdBWscQQ"),
+            new TestCaseUpgrader("aaa".toCharArray(), "_gsBBgEFAQYCBAEGAQYBBQEFAgQBBQIEy0I0hvpeH5uEtv904hwK5JA0Z7Yq8oZKQ6sZCkRYv5RK7TD2G036hQ=="),
+            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gsCBQIGAgUCBQEGAgUCBQEEAQYBBQIEOJdiMLlXkKcY1KhL9KAusl9syebscAmybnFbQvPLYu-wk8rvmyXoYA=="),
+            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gsBBQIFAgYBBAIEAQQBBAIFAQQCBgIEA_eAcjrkCGbaKpMZ857SVfqnUOkme_21Sh9jY_IJGFupmsfKlKzOYA=="),
+            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gsCBQEFAgQCBAIGAQYCBgIEAQUBBAIF9b7DDxReU-cttxYK07EqsvSMzUTLSkHtS2l2joQh7RvqCEhazQtlpQ=="),
+            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gsCBgIFAQUCBAIEAgYBBQIFAgUCBgIFcl_UAQEXEz7xh8Oxa7KCitR1fi9r61-5htL7X2aK9qan9Xp7NSrsBw==")
     };
 
     @Test
