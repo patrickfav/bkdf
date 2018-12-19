@@ -1,5 +1,10 @@
 # Releases
 
+## v0.4.0
+
+* add previous hash to upgrade salt schedule
+* add more tests
+
 ## v0.3.0
 
 * add password strength upgrader
