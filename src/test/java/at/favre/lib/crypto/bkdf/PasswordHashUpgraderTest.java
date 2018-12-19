@@ -6,11 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -216,7 +212,7 @@ public class PasswordHashUpgraderTest {
     @Test
     public void testVerifyReferenceTestUpgradeCount1() {
         for (TestCaseUpgrader testCase : testCasesUpgradeCount1) {
-            verifier.verify(testCase.password, testCase.hash);
+            assertTrue(verifier.verify(testCase.password, testCase.hash));
         }
     }
 
@@ -233,7 +229,7 @@ public class PasswordHashUpgraderTest {
     @Test
     public void testVerifyReferenceTestUpgradeCount2() {
         for (TestCaseUpgrader testCase : testCasesUpgradeCount2) {
-            verifier.verify(testCase.password, testCase.hash);
+            assertTrue(verifier.verify(testCase.password, testCase.hash));
         }
     }
 
@@ -250,7 +246,7 @@ public class PasswordHashUpgraderTest {
     @Test
     public void testVerifyReferenceTestUpgradeCount4() {
         for (TestCaseUpgrader testCase : testCasesUpgradeCount4) {
-            verifier.verify(testCase.password, testCase.hash);
+            assertTrue(verifier.verify(testCase.password, testCase.hash));
         }
     }
 
@@ -267,7 +263,7 @@ public class PasswordHashUpgraderTest {
     @Test
     public void testVerifyReferenceTestUpgradeCount10() {
         for (TestCaseUpgrader testCase : testCasesUpgradeCount10) {
-            verifier.verify(testCase.password, testCase.hash);
+            assertTrue(verifier.verify(testCase.password, testCase.hash));
         }
     }
 }

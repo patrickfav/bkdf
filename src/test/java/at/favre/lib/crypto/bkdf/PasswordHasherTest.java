@@ -151,7 +151,7 @@ public class PasswordHasherTest {
         PasswordHashVerifier verifier = BKDF.createPasswordHashVerifier();
 
         for (TestCaseHasher testCase : testCases) {
-            verifier.verify(testCase.password, testCase.hash);
+            assertTrue(verifier.verify(testCase.password, testCase.hash));
         }
     }
 
