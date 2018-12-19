@@ -1,6 +1,7 @@
 package at.favre.lib.crypto.bkdf;
 
 import at.favre.lib.bytes.Bytes;
+import at.favre.lib.crypto.bkdf.util.TestCaseUpgrader;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,11 +17,13 @@ import static org.junit.Assert.*;
 public class PasswordHashUpgraderTest {
     private PasswordHashUpgrader.Default upgrader;
     private PasswordHasher.Default hasher;
+    private PasswordHashVerifier verifier;
 
     @Before
     public void setup() {
         upgrader = new PasswordHashUpgrader.Default(new SecureRandom());
         hasher = new PasswordHasher.Default(Version.HKDF_HMAC512, new SecureRandom());
+        verifier = BKDF.createPasswordHashVerifier();
     }
 
     @Test
@@ -197,6 +200,74 @@ public class PasswordHashUpgraderTest {
             upgrader.verifyCompoundHash("secret".toCharArray(), new CompoundHashData(configs, new byte[16], new byte[23]).getAsEncodedMessageFormat());
             fail();
         } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    private final TestCaseUpgrader[] testCasesUpgradeCount1 = new TestCaseUpgrader[]{
+            new TestCaseUpgrader("a".toCharArray(), "_gICBQEGUoga3E7nC3OzD_IDzC8SqtWhqML1hS2vDjfYLs3-Vjx2yVy1la3q"),
+            new TestCaseUpgrader("aa".toCharArray(), "_gICBgIEXhNPJ-aMnEibCb1DF4jFNwWwfhekcn042KsSxSFquljj8ayX0WlcmQ=="),
+            new TestCaseUpgrader("aaa".toCharArray(), "_gICBQEGl_qyN0QmZgBOQuXiNJUuUv_3Sm0080k2kHRfpbZdsUugkKBN0ksS"),
+            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gIBBAEEONFeCTNFRTaWmeixx0_Mo8zNmSvBCLQoSUSf_umcGWTmS1042S3_"),
+            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gIBBAIE_bUfgdT8kz8uJfQKguyWXxd_o9jObnWi6cpg4dSLSvABZ7P075qUeQ=="),
+            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gICBQEF0fD8K8k0JPeNbGNMUl0Me2VVTCIgVza5p-mEAJ-3BK98Ut_tadL0"),
+            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gICBgIGbKEYY-0lra5nzdqYo94yVftMm7E7kgyFUVhmWmVdY_tPyh2g8W6rIw=="),
+    };
+
+    @Test
+    public void testVerifyReferenceTestUpgradeCount1() {
+        for (TestCaseUpgrader testCase : testCasesUpgradeCount1) {
+            verifier.verify(testCase.password, testCase.hash);
+        }
+    }
+
+    private final TestCaseUpgrader[] testCasesUpgradeCount2 = new TestCaseUpgrader[]{
+            new TestCaseUpgrader("a".toCharArray(), "_gMBBQIFAQZ6xH0X_SusDcQCSCxa69C_wEEQI07LWf7SXNXXubwJ-61n-5oo_-s="),
+            new TestCaseUpgrader("aa".toCharArray(), "_gMCBQIEAgRRz-2YbXFDQyAPG95kRwZRTD_UnMctxO8lyIDUdrETTgz_qoMcP42M"),
+            new TestCaseUpgrader("aaa".toCharArray(), "_gMCBgEGAQaZcYu2vhJ0lnNUA6gAAkGd-j6xB69LrQH1vaIBqM43OONe4YBq2qU="),
+            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gMBBgIFAgZSQ55dvwwSIWUIjvpIPp-tzmY95juGPxYctyLLxk6gNxRUaTLceuQ1"),
+            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gMCBgIEAgQUUAlXgtF1Wwpfe0jV0uJCvNWexkZWsUt2d1izQDz-lx2ehPmc52sG"),
+            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gMCBgIGAQWdNrQu0CFfzh7U0NoDbiDNq4D6kTke6fj3onNoy66dgT7LUrBdjXc="),
+            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gMCBQEEAgXXNWyCMDzFywabNGC94HjWk_-uYztXSrnTkArV8Wg7sq8rebcwuI99")
+    };
+
+    @Test
+    public void testVerifyReferenceTestUpgradeCount2() {
+        for (TestCaseUpgrader testCase : testCasesUpgradeCount2) {
+            verifier.verify(testCase.password, testCase.hash);
+        }
+    }
+
+    private final TestCaseUpgrader[] testCasesUpgradeCount4 = new TestCaseUpgrader[]{
+            new TestCaseUpgrader("a".toCharArray(), "_gUBBQEEAgQCBgEGgCrrUwkGLj9O_xFGMeuXNey6w8rFyOZnjRVxKJv4Bruyji5rsK6V"),
+            new TestCaseUpgrader("aa".toCharArray(), "_gUBBQEEAQYBBQEGb_oflUTXNK53qE_TLiqhnRkqhpnQ0pKg3i6oUDF6ufy_3vbvzgnF"),
+            new TestCaseUpgrader("aaa".toCharArray(), "_gUBBgEFAQUCBgEG1dHDEQLZUXrz162JQPBEKBDj9FAgvpRUw-ZAq8fOFju2WUFcDhq0"),
+            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gUCBQIEAQYCBQIFAbW4j1ck0ECYEOveSnnrFMGnqfkif8UYSOlx6ZAyKb0PYKL-AskXhw=="),
+            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gUBBgIEAQYBBgEE2eEBwLSKWf1-JdMGuDD65jxi95WHs_bm65a_fADuBlFSVbtgQ_lo"),
+            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gUCBgIGAgUBBAEFz_gn8vxRq07mcsAqFeibpuc9htNJjMEi3_gUKmrYYif_Tv1c9ni4"),
+            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gUBBAEFAQYCBQIG3rCRJaSNzijIQqXavmHiWiOjgfKhfr_1rQ2zLHNfKyx8-LYKUt2cEw==")
+    };
+
+    @Test
+    public void testVerifyReferenceTestUpgradeCount4() {
+        for (TestCaseUpgrader testCase : testCasesUpgradeCount4) {
+            verifier.verify(testCase.password, testCase.hash);
+        }
+    }
+
+    private final TestCaseUpgrader[] testCasesUpgradeCount10 = new TestCaseUpgrader[]{
+            new TestCaseUpgrader("a".toCharArray(), "_gsBBAEGAQQCBQEEAQYCBgEEAQQCBQIGypXPPirdTVL5dQzOkoReYhnbDRAldaeTCRzbCaUJhRuYzkxAFV-wdA=="),
+            new TestCaseUpgrader("aa".toCharArray(), "_gsBBgIGAQUBBQIFAQYBBAEEAQUBBAEFtlTAimutubnVn2H1Xc4TTVl4vhZSQWNVm7z1RMK6LrXlZtyFT9G-"),
+            new TestCaseUpgrader("aaa".toCharArray(), "_gsBBAEGAgQBBgEGAQUBBAIGAQQCBgIGdz8HhBsK6gfMFbNABsFu5K1SGJC6hfOA2S06bJ1djPq1d0fv1XgoUQ=="),
+            new TestCaseUpgrader("Secret1234%$!".toCharArray(), "_gsCBQEEAgUBBQIFAgQCBQIFAgQCBQEFdMUGhqiHkPw7PGkdZGzZL9FjYJhpMouhR6YV_W2El5MJDCFdhvuI"),
+            new TestCaseUpgrader("~!@#$%^&*()      ~!@#$%^&*()PNBFRD".toCharArray(), "_gsCBgIFAgUBBgIGAgYCBQEFAQUBBQEGc3u9eXCxjSuPV2gYgb6sYdWH3Rm-gyTpvs5TQ_sQqTAuhR_6L-_A"),
+            new TestCaseUpgrader("1jY9EAq1wFINBASejNxISzxXwgGbCrcFJg3/14YHRsd3YCptpkooGUwHCy9FQvei3sCXKE4i48a5hy/".toCharArray(), "_gsBBgIGAQQCBQEEAQYBBAIGAgQBBgIGDQVuk2F5LOYg68ivD7kOUA0uYcVTo9MdziF6ax8WstKwGLPcLdBveQ=="),
+            new TestCaseUpgrader("ππππππππ".toCharArray(), "_gsCBgEEAQYBBQIGAQYBBQIFAQQBBQIFHZ_tuFTbcYR-1pQkRbTnKHAuzv7BYcGHPttG5bvOvIJpxMxQVnBONw==")
+    };
+
+    @Test
+    public void testVerifyReferenceTestUpgradeCount10() {
+        for (TestCaseUpgrader testCase : testCasesUpgradeCount10) {
+            verifier.verify(testCase.password, testCase.hash);
         }
     }
 }
