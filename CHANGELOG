@@ -1,5 +1,9 @@
 # Releases
 
+## v0.3.0
+
+* add password strength upgrader
+
 ## v0.2.0
 
 * Substantial refactorings
