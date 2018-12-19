@@ -1,6 +1,8 @@
 package at.favre.lib.crypto.bkdf;
 
 import at.favre.lib.bytes.Bytes;
+import at.favre.lib.crypto.bkdf.testdata.KdfTestData;
+import at.favre.lib.crypto.bkdf.util.TestCaseKdf;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -86,5 +88,28 @@ public class KeyDerivationFunctionTest {
 
         assertEquals(15, k1.outLengthByte);
         assertArrayEquals(new byte[9], k1.infoParam);
+    }
+
+    @Test
+    public void testVerifyReferenceTest1() {
+        testVerifyReferenceTest(Version.HKDF_HMAC512, KdfTestData.TEST_DATA_V1_72_OUT);
+    }
+
+    @Test
+    public void testVerifyReferenceTest2() {
+        testVerifyReferenceTest(Version.HKDF_HMAC512_BCRYPT_24_BYTE, KdfTestData.TEST_DATA_V2_72_OUT);
+    }
+
+    @Test
+    public void testVerifyReferenceTest3() {
+        testVerifyReferenceTest(Version.HKDF_HMAC512, KdfTestData.TEST_DATA_V1_16_OUT);
+    }
+
+    private void testVerifyReferenceTest(Version version, TestCaseKdf[] data) {
+        KeyDerivationFunction kdf = BKDF.createKdf(version);
+        for (TestCaseKdf testCase : data) {
+            byte[] okm = kdf.derive(testCase.salt, testCase.password, testCase.cost, testCase.info, testCase.outLength);
+            assertArrayEquals(testCase.hash, okm);
+        }
     }
 }

@@ -19,4 +19,9 @@ public class GenerateTestData {
     public void createPasswordUpgraderReferencesHashes() {
         TestCaseUpgrader.createReferenceHashes();
     }
+
+    @Test
+    public void createKdfHashes() {
+        TestCaseKdf.createReferenceHashes();
+    }
 }
