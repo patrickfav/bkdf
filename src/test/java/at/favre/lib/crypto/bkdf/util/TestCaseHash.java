@@ -1,11 +1,11 @@
-package at.favre.lib.crypto.bkdf;
+package at.favre.lib.crypto.bkdf.util;
 
-public class TestCase {
+public final class TestCaseHash {
 
     public final char[] password;
     public final String hash;
 
-    public TestCase(char[] password, String hash) {
+    public TestCaseHash(char[] password, String hash) {
         this.password = password;
         this.hash = hash;
     }

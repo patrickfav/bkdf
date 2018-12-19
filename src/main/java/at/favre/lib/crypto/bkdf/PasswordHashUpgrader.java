@@ -1,6 +1,7 @@
 package at.favre.lib.crypto.bkdf;
 
 import at.favre.lib.bytes.Bytes;
+import at.favre.lib.crypto.HKDF;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -93,13 +94,36 @@ public interface PasswordHashUpgrader {
         public CompoundHashData upgradePasswordHashWith(Version version, int costFactor, String bkdfPasswordHashFormat2) {
             CompoundHashData compoundHashData = createHashData(bkdfPasswordHashFormat2);
 
-            List<CompoundHashData.HashConfig> newConfigList = new ArrayList<>(compoundHashData.hashConfigList);
-            newConfigList.add(new CompoundHashData.HashConfig(version, (byte) costFactor));
+            List<CompoundHashData.Config> newConfigList = new ArrayList<>(compoundHashData.configList);
+            newConfigList.add(new CompoundHashData.Config(version, (byte) costFactor));
 
             PasswordHasher.Default hasher = new PasswordHasher.Default(version, secureRandom);
-            byte[] upgradedHash = hasher.hashRaw(compoundHashData.rawHash, compoundHashData.rawSalt, costFactor).rawHash;
+            byte[] upgradedHash = hasher.hashRaw(compoundHashData.rawHash,
+                    deriveSalt(newConfigList.size() - 1, compoundHashData.rawSalt, version.getVersionCode(), (byte) costFactor),
+                    costFactor).rawHash;
 
             return new CompoundHashData(newConfigList, compoundHashData.rawSalt, upgradedHash);
+        }
+
+        /**
+         * Derives salt according to password upgrade protocol:
+         * <ul>
+         * <li>If counter 0: return salt</li>
+         * <li>If counter 1+: return hkdf_expand(salt, 4-byte-counter | 1-byte-version_code | 1-byte-cost_factor, 16) with HMAC_SHA512</li>
+         * </ul>
+         *
+         * @param counter     of the current chained hash, e.g. if 4 configs are chained, the counter will go from 0-3
+         * @param salt        as found with {@link CompoundHashData#rawSalt}
+         * @param versionCode of the currently used password hash, see {@link Version#getVersionCode()}
+         * @param costFactor  of the currently used password hash, see {@link CompoundHashData.Config#cost}
+         * @return correct derived salt for this round
+         */
+        private byte[] deriveSalt(int counter, byte[] salt, byte versionCode, byte costFactor) {
+            if (counter == 0) {
+                return salt;
+            } else {
+                return HKDF.fromHmacSha512().expand(salt, Bytes.from(counter).append(versionCode).append(costFactor).array(), 16);
+            }
         }
 
         private CompoundHashData createHashData(String bkdfPasswordHashFormat2) {
@@ -117,20 +141,22 @@ public interface PasswordHashUpgrader {
         @Override
         public CompoundHashData upgradePasswordHashTo(int costFactor, String bkdfPasswordHashFormat2) {
             CompoundHashData data = createHashData(bkdfPasswordHashFormat2);
-            List<Integer> currentCostList = new ArrayList<>(data.hashConfigList.size());
-            for (CompoundHashData.HashConfig config : data.hashConfigList) {
+            List<Integer> currentCostList = new ArrayList<>(data.configList.size());
+            for (CompoundHashData.Config config : data.configList) {
                 currentCostList.add((int) config.cost);
             }
             List<Integer> sequence = calcUpgradeSeq(currentCostList, costFactor);
-            Version usedVersion = data.hashConfigList.get(data.hashConfigList.size() - 1).version;
+            Version usedVersion = data.configList.get(data.configList.size() - 1).version;
 
-            List<CompoundHashData.HashConfig> newConfigList = new ArrayList<>(data.hashConfigList);
+            List<CompoundHashData.Config> newConfigList = new ArrayList<>(data.configList);
             byte[] upgradedHash = data.rawHash;
             PasswordHasher.Default hasher = new PasswordHasher.Default(usedVersion, secureRandom);
 
             for (Integer seqCf : sequence) {
-                upgradedHash = hasher.hashRaw(upgradedHash, data.rawSalt, seqCf).rawHash;
-                newConfigList.add(new CompoundHashData.HashConfig(usedVersion, seqCf.byteValue()));
+                newConfigList.add(new CompoundHashData.Config(usedVersion, seqCf.byteValue()));
+                upgradedHash = hasher.hashRaw(upgradedHash,
+                        deriveSalt(newConfigList.size() - 1, data.rawSalt, usedVersion.getVersionCode(), seqCf.byteValue()),
+                        seqCf).rawHash;
             }
 
             return new CompoundHashData(newConfigList, data.rawSalt, upgradedHash);
@@ -173,7 +199,7 @@ public interface PasswordHashUpgrader {
             byte[] blobMsg = Bytes.parseBase64(bkdfPasswordHashFormat2).array();
             CompoundHashData data = CompoundHashData.parse(blobMsg);
 
-            CompoundHashData referenceHash = calculateCompoundHash(data.hashConfigList, data.rawSalt, password);
+            CompoundHashData referenceHash = calculateCompoundHash(data.configList, data.rawSalt, password);
             return Bytes.wrap(data.rawHash).equalsConstantTime(referenceHash.rawHash);
         }
 
@@ -183,21 +209,24 @@ public interface PasswordHashUpgrader {
                     Bytes.from(COMPOUND_FORMAT_VERSION).encodeBase64Url().replaceAll("=", ""));
         }
 
-        private CompoundHashData calculateCompoundHash(List<CompoundHashData.HashConfig> hashConfigs, byte[] salt, char[] password) {
-            if (hashConfigs.size() < 1) {
+        private CompoundHashData calculateCompoundHash(List<CompoundHashData.Config> configs, byte[] salt, char[] password) {
+            if (configs.size() < 1) {
                 throw new IllegalArgumentException("must be at least a single hash config");
             }
-            if (hashConfigs.size() > 255) {
+            if (configs.size() > 255) {
                 throw new IllegalArgumentException("no more than 255 configs allowed");
             }
 
             byte[] tempHashValue = Bytes.from(password).array();
-            for (CompoundHashData.HashConfig hashConfig : hashConfigs) {
-                PasswordHasher.Default hasher = new PasswordHasher.Default(hashConfig.version, secureRandom);
-                tempHashValue = hasher.hashRaw(tempHashValue, salt, hashConfig.cost).rawHash;
+            int counter = 0;
+            for (CompoundHashData.Config config : configs) {
+                PasswordHasher.Default hasher = new PasswordHasher.Default(config.version, secureRandom);
+                tempHashValue = hasher.hashRaw(tempHashValue,
+                        deriveSalt(counter++, salt, config.version.getVersionCode(), config.cost),
+                        config.cost).rawHash;
             }
 
-            return new CompoundHashData(hashConfigs, salt, tempHashValue);
+            return new CompoundHashData(configs, salt, tempHashValue);
         }
     }
 }

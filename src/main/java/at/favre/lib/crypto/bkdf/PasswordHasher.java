@@ -37,6 +37,14 @@ public interface PasswordHasher {
     HashData hashRaw(char[] password, int costFactor);
 
     /**
+     * Get the in this instance used hash version.
+     * See {@link Version}.
+     *
+     * @return hash version
+     */
+    Version getHashVersion();
+
+    /**
      * Default implementation
      */
     final class Default implements PasswordHasher {
@@ -59,6 +67,11 @@ public interface PasswordHasher {
             return hashRaw(password, salt16Byte, costFactor);
         }
 
+        @Override
+        public Version getHashVersion() {
+            return version;
+        }
+
         HashData hashRaw(char[] password, byte[] salt16Byte, int costFactor) {
             if (salt16Byte == null || salt16Byte.length < 16) {
                 throw new IllegalArgumentException("invalid salt");
@@ -76,7 +89,7 @@ public interface PasswordHasher {
 
             BCrypt.HashData data = BCrypt.with(
                     new BCrypt.Version(new byte[]{0x32, 0x61},
-                            version.isUseOnly23ByteBcryptOut(),
+                            version.getHashByteLength() == Version.MIN_BCRYPT_HASH_LENGTH_BYTE,
                             true, null, null))
                     .hashRaw(costFactor, salt16Byte, extractedPw);
 

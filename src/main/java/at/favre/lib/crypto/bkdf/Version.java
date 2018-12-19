@@ -1,5 +1,6 @@
 package at.favre.lib.crypto.bkdf;
 
+import at.favre.lib.bytes.Bytes;
 import at.favre.lib.crypto.HKDF;
 
 import java.util.Arrays;
@@ -12,15 +13,18 @@ import java.util.Objects;
  */
 public interface Version {
 
+    int MIN_BCRYPT_HASH_LENGTH_BYTE = 23;
+    int MAX_BCRYPT_HASH_LENGTH_BYTE = 24;
+
     /**
      * Using HKDF-HMAC-SHA512 and 23 byte bcrypt output
      */
-    Version HKDF_HMAC512 = new Default(HKDF.fromHmacSha512(), true, (byte) 0x01);
+    Version HKDF_HMAC512 = new Default(HKDF.fromHmacSha512(), MIN_BCRYPT_HASH_LENGTH_BYTE, (byte) 0x01);
 
     /**
      * Using HKDF-HMAC-SHA512 and 24 byte bcrypt output
      */
-    Version HKDF_HMAC512_BCRYPT_24_BYTE = new Default(HKDF.fromHmacSha512(), false, (byte) 0x02);
+    Version HKDF_HMAC512_BCRYPT_24_BYTE = new Default(HKDF.fromHmacSha512(), MAX_BCRYPT_HASH_LENGTH_BYTE, (byte) 0x02);
 
     /**
      * List of supported {@link Version}
@@ -42,12 +46,13 @@ public interface Version {
     HKDF getHkdf();
 
     /**
-     * Choose if you want to use a more compatible approach (using only 23 byte output from bcrypt) or a more correct
+     * Gets the used bcrypt hash byte length.
+     * This is usually 23 or 24 bytes. Choose if you want to use a more compatible approach (using only 23 byte output from bcrypt) or a more correct
      * approach (using the full 24 byte blowfish provides) of using the underlying bcrypt hash.
      *
-     * @return true iff only 23 and not 24 byte of the bcrypt hash is used
+     * @return length of the used bcrypt hash (23 or 24 byte)
      */
-    boolean isUseOnly23ByteBcryptOut();
+    int getHashByteLength();
 
     /**
      * Wrapper class for static util methods
@@ -75,13 +80,16 @@ public interface Version {
 
     final class Default implements Version {
         private final HKDF hkdf;
-        private final boolean useOnly23ByteBcryptOut;
+        private final int hashByteLength;
         private final byte versionCode;
 
         @SuppressWarnings("WeakerAccess")
-        public Default(HKDF hkdf, boolean useOnly23ByteBcryptOut, byte versionCode) {
-            this.hkdf = hkdf;
-            this.useOnly23ByteBcryptOut = useOnly23ByteBcryptOut;
+        public Default(HKDF hkdf, int hashByteLength, byte versionCode) {
+            if (hashByteLength != MIN_BCRYPT_HASH_LENGTH_BYTE && hashByteLength != MAX_BCRYPT_HASH_LENGTH_BYTE) {
+                throw new IllegalArgumentException("hash length must either be " + MIN_BCRYPT_HASH_LENGTH_BYTE + " or " + MAX_BCRYPT_HASH_LENGTH_BYTE);
+            }
+            this.hkdf = Objects.requireNonNull(hkdf);
+            this.hashByteLength = hashByteLength;
             this.versionCode = versionCode;
         }
 
@@ -91,8 +99,8 @@ public interface Version {
         }
 
         @Override
-        public boolean isUseOnly23ByteBcryptOut() {
-            return useOnly23ByteBcryptOut;
+        public int getHashByteLength() {
+            return hashByteLength;
         }
 
         @Override
@@ -105,14 +113,14 @@ public interface Version {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             Default aDefault = (Default) o;
-            return useOnly23ByteBcryptOut == aDefault.useOnly23ByteBcryptOut &&
+            return hashByteLength == aDefault.hashByteLength &&
                     versionCode == aDefault.versionCode &&
                     Objects.equals(hkdf, aDefault.hkdf);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(hkdf, useOnly23ByteBcryptOut, versionCode);
+            return Objects.hash(hkdf, hashByteLength, versionCode);
         }
     }
 
@@ -134,7 +142,7 @@ public interface Version {
 
         @Override
         public String getMessage() {
-            return String.format("Version %d is not supported in this implementation of BKDF", unsupportedByte);
+            return String.format("Version 0x%s is not supported in this implementation of BKDF", Bytes.from((byte) unsupportedByte).encodeHex());
         }
     }
 }

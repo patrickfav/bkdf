@@ -5,7 +5,11 @@ import at.favre.lib.crypto.HKDF;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Key Derivation protocol of BKDF. Used for derived high entropy secret keys from user passwords with a given cost factor.
@@ -92,17 +96,27 @@ public interface KeyDerivationFunction {
     List<byte[]> deriveMulti(byte[] salt, byte[] ikm, int costFactor, List<KdfConfig> configList);
 
     /**
+     * Get the in this instance used hash version.
+     * See {@link Version}.
+     *
+     * @return hash version
+     */
+    Version getHashVersion();
+
+    /**
      * Default implementation
      */
     final class Default implements KeyDerivationFunction {
         private static final byte[] FIXED_INFO_PARAM = Bytes.from("bkdf").array();
 
+        private final byte versionCode;
         private final HKDF hkdf;
-        private final boolean useOnly23ByteBcryptOut;
+        private final int hashByteLength;
 
         public Default(Version version) {
+            this.versionCode = version.getVersionCode();
             this.hkdf = version.getHkdf();
-            this.useOnly23ByteBcryptOut = version.isUseOnly23ByteBcryptOut();
+            this.hashByteLength = version.getHashByteLength();
         }
 
         @Override
@@ -126,7 +140,7 @@ public interface KeyDerivationFunction {
 
             BCrypt.HashData data = BCrypt.with(
                     new BCrypt.Version(new byte[]{0x32, 0x61},
-                            useOnly23ByteBcryptOut,
+                            hashByteLength == Version.MIN_BCRYPT_HASH_LENGTH_BYTE,
                             true, null, null))
                     .hashRaw(costFactor, salt, extractedPw);
 
@@ -135,6 +149,11 @@ public interface KeyDerivationFunction {
                 outList.add(hkdf.expand(data.rawHash, Bytes.wrapNullSafe(kdfConfig.infoParam).append(FIXED_INFO_PARAM).array(), kdfConfig.outLengthByte));
             }
             return outList;
+        }
+
+        @Override
+        public Version getHashVersion() {
+            return Version.Util.getByCode(versionCode);
         }
     }
 
