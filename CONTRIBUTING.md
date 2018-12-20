@@ -1,4 +1,4 @@
-# Contributing to HKDF
+# Contributing
 
 We ❤ pull requests from everyone.
 
