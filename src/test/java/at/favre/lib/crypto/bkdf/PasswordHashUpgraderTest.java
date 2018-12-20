@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
 
 public class PasswordHashUpgraderTest {
     private PasswordHashUpgrader.Default upgrader;
-    private PasswordHasher.Default hasher;
+    private PasswordHasher hasher;
     private PasswordHashVerifier verifier;
 
     @Before
@@ -34,8 +34,7 @@ public class PasswordHashUpgraderTest {
         PasswordHashVerifier verifier = BKDF.createPasswordHashVerifier();
         assertTrue(verifier.verify(pw, hash));
 
-        CompoundHashData compoundHashData =
-                upgrader.upgradePasswordHashWith(Version.HKDF_HMAC512_BCRYPT_24_BYTE, 6, hash);
+        CompoundHashData compoundHashData = upgrader.upgradePasswordHashWith(6, hash);
 
         assertTrue(upgrader.verifyCompoundHash(pw, compoundHashData.getAsEncodedMessageFormat()));
         System.out.println(Bytes.wrap(compoundHashData.getAsBlobMessageFormat()).encodeHex(true));

@@ -18,7 +18,7 @@ public final class BKDF {
      * @return new instance
      */
     public static PasswordHasher createPasswordHasher() {
-        return createPasswordHasher(Version.HKDF_HMAC512_BCRYPT_24_BYTE, new SecureRandom());
+        return createPasswordHasher(Version.DEFAULT_VERSION, new SecureRandom());
     }
 
     /**
@@ -88,7 +88,7 @@ public final class BKDF {
      * @return new instance
      */
     public static KeyDerivationFunction createKdf() {
-        return createKdf(Version.HKDF_HMAC512_BCRYPT_24_BYTE);
+        return createKdf(Version.DEFAULT_VERSION);
     }
 
 }

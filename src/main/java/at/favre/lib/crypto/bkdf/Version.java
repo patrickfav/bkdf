@@ -13,6 +13,11 @@ import java.util.Objects;
  */
 public interface Version {
 
+    /**
+     * The globally used default version if no version is given
+     */
+    Version DEFAULT_VERSION = Version.HKDF_HMAC512_BCRYPT_24_BYTE;
+
     int MIN_BCRYPT_HASH_LENGTH_BYTE = 23;
     int MAX_BCRYPT_HASH_LENGTH_BYTE = 24;
 

@@ -47,6 +47,19 @@ public interface PasswordHashUpgrader {
     CompoundHashData upgradePasswordHashWith(Version version, int costFactor, String bkdfPasswordHashFormat2);
 
     /**
+     * Upgrades the given hash <strong>with</strong> the given new cost factor and default version
+     * <p>
+     * This will chain the current hash with given hash exactly as defined by the the input paramters. E.g.
+     * if the current hash is <code>[(VERSION_1, 4)]</code> and the the following will be passed: (VERSION_2, 10), the resulting
+     * hash config is <code>[(VERSION_1, 4), (VERSION_2, 10)]</code>.
+     *
+     * @param costFactor              to be used on the current hash
+     * @param bkdfPasswordHashFormat2 the current hash. Can be in compound or normal password hash format
+     * @return upgraded hash data
+     */
+    CompoundHashData upgradePasswordHashWith(int costFactor, String bkdfPasswordHashFormat2);
+
+    /**
      * Upgrades the given hash <strong>to</strong> the given new cost factor.
      * <p>
      * This will chain the current hash with possibly multiple hash configs to achieve the new final cost factor. E.g. if current cost-factor
@@ -103,6 +116,11 @@ public interface PasswordHashUpgrader {
                     costFactor).rawHash;
 
             return new CompoundHashData(newConfigList, compoundHashData.rawSalt, upgradedHash);
+        }
+
+        @Override
+        public CompoundHashData upgradePasswordHashWith(int costFactor, String bkdfPasswordHashFormat2) {
+            return upgradePasswordHashWith(Version.DEFAULT_VERSION, costFactor, bkdfPasswordHashFormat2);
         }
 
         /**
