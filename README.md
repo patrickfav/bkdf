@@ -1,11 +1,21 @@
 # BCrypt based Key Derivation Function (BKDF)
 
-WIP
+The aim of this project is to improve on the cryptographic primitive [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) with providing well defined modes of operation which includes:
+
+* Improved password hashing function
+* Protocol to upgrade password hashes offline
+* Fully functional key derivation function
+
+This protocol only introduces [HKDF](https://en.wikipedia.org/wiki/HKDF) as additional building block to support the aforementioned use-cases.
+
+Note, that this project is ongoing research and may not be ready for prime-time yet as it requires more feedback from the cryptographic community.
 
 [![Download](https://api.bintray.com/packages/patrickfav/maven/bkdf/images/download.svg)](https://bintray.com/patrickfav/maven/bkdf/_latestVersion)
 [![Build Status](https://travis-ci.org/patrickfav/bkdf.svg?branch=master)](https://travis-ci.org/patrickfav/bkdf)
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/bkdf.svg)](https://www.javadoc.io/doc/at.favre.lib/bkdf)
 [![Coverage Status](https://coveralls.io/repos/github/patrickfav/bkdf/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/bkdf?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/bkdf/maintainability)
+
+The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to be compatible with most [_Android_](https://www.android.com/) versions as well as normal Java applications.
 
 ## Quickstart
 
@@ -17,18 +27,99 @@ Add dependency to your `pom.xml` ([check latest release](https://github.com/patr
         <version>{latest-version}</version>
     </dependency>
 
-A very simple example:
+A very simple example using the password hasher:
 
 ```java
-tba
+PasswordHasher hasher = BKDF.createPasswordHasher();
+
+char[] pw = "secret".toCharArray();
+int costFactor = 6; // same as with bcrypt 4-31 doubling the iterations every increase
+
+//returns base64 url-safe encoded string
+String hash = hasher.hash(pw, costFactor);
+
+PasswordHashVerifier verifier = BKDF.createPasswordHashVerifier();
+boolean verified = verifier.verify(pw, hash);
 ```
 
 ### Full Example
 
+The BKDF protocol supports 3 use-cases:
 
+* password hash with key stretching feature for storage
+* upgrade of previously generated password hashes offline without the user password
+* key derivation function with key strechting feature to generate high quality keying material (for e.g. secret keys)
+
+#### Password Hash
+
+A password hash is used to generate a hash from a user-password which can't easily be used to calculate the used password without brute-forcing. An important feature of password hashes are, that they are slow, so it makes it harder (or infeasible) for an attacker to brute force. This property is also called "[key-stretching](https://en.wikipedia.org/wiki/Key_stretching)". Well known password hashes are [PBKDF2](https://en.wikipedia.org/wiki/PBKDF2), [scrypt](https://en.wikipedia.org/wiki/Scrypt) and [Argon2](https://en.wikipedia.org/wiki/Argon2).
 
 ```java
-tba
+// provide different version of hash config and provide own impl of secure random for salt gen
+PasswordHasher hasher = BKDF.createPasswordHasher(Version.HKDF_HMAC512, new SecureRandom());
+char[] pw = "secret".toCharArray();
+HashData hashData = hasher.hashRaw("secret".toCharArray(), 4);
+
+// get the raw, non-encoded hash message
+byte[] hashMsgAsBlob = hashData.getAsBlobMessageFormat();
+
+// get the base64 url-safe encoded string
+String hashAsBase64 = hashData.getAsEncodedMessageFormat();
+
+PasswordHashVerifier verifier = BKDF.createPasswordHashVerifier();
+boolean verified = verifier.verify(pw, hashData);
+```
+
+#### Password Hash Upgrade
+
+BCrypt does not support upgrading the strength of the password hash without the user password. Having legacy password hashes in a DB, the need may arise to improve them, because CPU performance increased of the last couple of years. With this feature a password can be upgraded offline by basically chaining multiple hashes together.
+
+This mode will chain a specific new hash with given cost factor:
+
+```java
+char[] pw = "secret".toCharArray();
+
+// hash with cost factor 5
+String hash = BKDF.createPasswordHasher().hash(pw, 5);
+PasswordHashUpgrader upgrader = new PasswordHashUpgrader.Default(new SecureRandom());
+
+// upgrade hash with an additional cost factor (ie. now needs to calculate 5 + 6 = 32 + 64 = 96 iterations
+CompoundHashData compoundHashData = upgrader.upgradePasswordHashWith(6, hash);
+
+// create base64 url-safe encoded msg and verify
+boolean verified = BKDF.createPasswordHashVerifier().verify(pw, compoundHashData.getAsEncodedMessageFormat());
+```
+
+Another mode will take a target cost factor and calculate the required hashes to achieve it
+
+```java
+char[] pw = "secret".toCharArray();
+
+// hash with cost factor 5
+String hash = BKDF.createPasswordHasher().hash(pw, 5);
+PasswordHashUpgrader upgrader = new PasswordHashUpgrader.Default(new SecureRandom());
+
+// upgrade to have exactly cost factor 8 (aka 2^8 = 256 iterations)
+CompoundHashData compoundHashData = upgrader.upgradePasswordHashTo(8, hash);
+
+// create base64 url-safe encoded msg and verify
+boolean verified = BKDF.createPasswordHashVerifier().verify(pw, compoundHashData.getAsEncodedMessageFormat());
+```
+
+#### Key Derivation Function
+It might be useful to have a primitive that generates high-quality key material for e.g. symmetric encryption and not password hashes.
+
+```java
+char[] pw = "secret".toCharArray();
+byte[] salt = Bytes.random(16).array();
+int costFactor = 5;
+
+KeyDerivationFunction kdf = new KeyDerivationFunction.Default(Version.HKDF_HMAC512);
+byte[] aesKey = kdf.derive(salt, pw, costFactor, Bytes.from("aes-key").array(), 16);
+byte[] macKey = kdf.derive(salt, pw, costFactor, Bytes.from("mac-key").array(), 32);
+
+SecretKey aesSecretKey = new SecretKeySpec(aesKey, "AES");
+SecretKey macSecretKey = new SecretKeySpec(macKey, "HmacSHA512");
 ```
 
 ## Download
