@@ -13,10 +13,6 @@ import java.util.Objects;
  */
 public interface Version {
 
-    /**
-     * The globally used default version if no version is given
-     */
-    Version DEFAULT_VERSION = Version.HKDF_HMAC512_BCRYPT_24_BYTE;
 
     int MIN_BCRYPT_HASH_LENGTH_BYTE = 23;
     int MAX_BCRYPT_HASH_LENGTH_BYTE = 24;
@@ -30,6 +26,10 @@ public interface Version {
      * Using HKDF-HMAC-SHA512 and 24 byte bcrypt output
      */
     Version HKDF_HMAC512_BCRYPT_24_BYTE = new Default(HKDF.fromHmacSha512(), MAX_BCRYPT_HASH_LENGTH_BYTE, (byte) 0x02);
+    /**
+     * The globally used default version if no version is given
+     */
+    Version DEFAULT_VERSION = Version.HKDF_HMAC512_BCRYPT_24_BYTE;
 
     /**
      * List of supported {@link Version}
