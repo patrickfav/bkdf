@@ -109,6 +109,8 @@ boolean verified = BKDF.createPasswordHashVerifier().verify(pw, compoundHashData
 #### Key Derivation Function
 It might be useful to have a primitive that generates high-quality key material for e.g. symmetric encryption and not password hashes.
 
+This example creates an AES key from a user password: 
+
 ```java
 char[] pw = "secret".toCharArray();
 byte[] salt = Bytes.random(16).array();
@@ -116,11 +118,44 @@ int costFactor = 5;
 
 KeyDerivationFunction kdf = new KeyDerivationFunction.Default(Version.HKDF_HMAC512);
 byte[] aesKey = kdf.derive(salt, pw, costFactor, Bytes.from("aes-key").array(), 16);
-byte[] macKey = kdf.derive(salt, pw, costFactor, Bytes.from("mac-key").array(), 32);
 
 SecretKey aesSecretKey = new SecretKeySpec(aesKey, "AES");
-SecretKey macSecretKey = new SecretKeySpec(macKey, "HmacSHA512");
 ```
+
+To generate multiple keys, use the following example, so you are not required to generate the internal bcrypt hash for every key: 
+
+```java
+// a entropy source used in your current protocol
+byte[] ikm = Bytes.random(12).array();
+byte[] salt = Bytes.random(16).array();
+int costFactor = 5;
+
+KeyDerivationFunction kdf = new KeyDerivationFunction.Default(Version.HKDF_HMAC512);
+List<KeyDerivationFunction.KdfConfig> config = Arrays.asList(
+        new KeyDerivationFunction.KdfConfig(Bytes.from("aes-key").array(), 16),
+        new KeyDerivationFunction.KdfConfig(Bytes.from("mac-key").array(), 32)
+);
+List<byte[]> keys = kdf.deriveMulti(salt, ikm, costFactor, config);
+
+SecretKey aesSecretKey = new SecretKeySpec(keys.get(0), "AES");
+SecretKey macSecretKey = new SecretKeySpec(keys.get(1), "HmacSHA512");
+```
+
+## Description
+
+In the following the detauls of each of the protocols are discussed.
+
+### Password Hash Protocol
+
+tbd.
+
+### Password Upgrade Protocol
+
+tbd.
+
+### KDF Protocol
+
+tbd.
 
 ## Download
 

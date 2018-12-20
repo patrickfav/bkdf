@@ -6,6 +6,8 @@ import org.junit.Test;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -80,6 +82,7 @@ public class QuickstartTest {
         assertTrue(verified);
     }
 
+    @Test
     public void kdfExample1() {
         char[] pw = "secret".toCharArray();
         byte[] salt = Bytes.random(16).array();
@@ -87,10 +90,27 @@ public class QuickstartTest {
 
         KeyDerivationFunction kdf = new KeyDerivationFunction.Default(Version.HKDF_HMAC512);
         byte[] aesKey = kdf.derive(salt, pw, costFactor, Bytes.from("aes-key").array(), 16);
-        byte[] macKey = kdf.derive(salt, pw, costFactor, Bytes.from("mac-key").array(), 32);
-
         SecretKey aesSecretKey = new SecretKeySpec(aesKey, "AES");
-        SecretKey macSecretKey = new SecretKeySpec(macKey, "HmacSHA512");
+
+        assertNotNull(aesSecretKey);
+    }
+
+    @Test
+    public void kdfExample2() {
+        // a entropy source used in your current protocol
+        byte[] ikm = Bytes.random(12).array();
+        byte[] salt = Bytes.random(16).array();
+        int costFactor = 5;
+
+        KeyDerivationFunction kdf = new KeyDerivationFunction.Default(Version.HKDF_HMAC512);
+        List<KeyDerivationFunction.KdfConfig> config = Arrays.asList(
+                new KeyDerivationFunction.KdfConfig(Bytes.from("aes-key").array(), 16),
+                new KeyDerivationFunction.KdfConfig(Bytes.from("mac-key").array(), 32)
+        );
+        List<byte[]> keys = kdf.deriveMulti(salt, ikm, costFactor, config);
+
+        SecretKey aesSecretKey = new SecretKeySpec(keys.get(0), "AES");
+        SecretKey macSecretKey = new SecretKeySpec(keys.get(1), "HmacSHA512");
 
         assertNotNull(aesSecretKey);
         assertNotNull(macSecretKey);
