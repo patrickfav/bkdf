@@ -13,8 +13,14 @@ import java.util.Objects;
  */
 public interface Version {
 
-
+    /**
+     * The normal length of a bcrypt hash
+     */
     int MIN_BCRYPT_HASH_LENGTH_BYTE = 23;
+
+    /**
+     * The possible output lenght of a bcrypt hash
+     */
     int MAX_BCRYPT_HASH_LENGTH_BYTE = 24;
 
     /**

@@ -4,17 +4,14 @@ import at.favre.lib.bytes.Bytes;
 import at.favre.lib.bytes.BytesValidators;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * A data format encapsulating possible multiple hash configs which were applied to given hash.
  */
 @SuppressWarnings("WeakerAccess")
 public final class CompoundHashData {
+
     public final List<Config> configList;
     public final byte[] rawSalt;
     public final byte[] rawHash;
@@ -70,7 +67,7 @@ public final class CompoundHashData {
             configList.add(new Config(currentVersion, costFactor));
         }
 
-        byte[] salt = new byte[16];
+        byte[] salt = new byte[HashData.SALT_LENGTH_BYTE];
         b.get(salt);
 
         int hashByteLength = configList.get(configList.size() - 1).version.getHashByteLength();
