@@ -1,21 +1,21 @@
 # BCrypt based Key Derivation Function (BKDF)
 
+[![Download](https://api.bintray.com/packages/patrickfav/maven/bkdf/images/download.svg)](https://bintray.com/patrickfav/maven/bkdf/_latestVersion)
+[![Build Status](https://travis-ci.org/patrickfav/bkdf.svg?branch=master)](https://travis-ci.org/patrickfav/bkdf)
+[![Javadocs](https://www.javadoc.io/badge/at.favre.lib/bkdf.svg)](https://www.javadoc.io/doc/at.favre.lib/bkdf)
+[![Coverage Status](https://coveralls.io/repos/github/patrickfav/bkdf/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/bkdf?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/bkdf/maintainability)
+
 The aim of this project is to improve on the cryptographic primitive [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) with providing well defined modes of operation which includes:
 
 * Improved password hashing function
 * Protocol to upgrade password hashes offline
 * Fully functional key derivation function
 
-This protocol only introduces [HKDF](https://en.wikipedia.org/wiki/HKDF) as additional building block to support the aforementioned use-cases.
-
-Note, that this project is ongoing research and may not be ready for prime-time yet as it requires more feedback from the cryptographic community.
-
-[![Download](https://api.bintray.com/packages/patrickfav/maven/bkdf/images/download.svg)](https://bintray.com/patrickfav/maven/bkdf/_latestVersion)
-[![Build Status](https://travis-ci.org/patrickfav/bkdf.svg?branch=master)](https://travis-ci.org/patrickfav/bkdf)
-[![Javadocs](https://www.javadoc.io/badge/at.favre.lib/bkdf.svg)](https://www.javadoc.io/doc/at.favre.lib/bkdf)
-[![Coverage Status](https://coveralls.io/repos/github/patrickfav/bkdf/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/bkdf?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/bkdf/maintainability)
+All this is achieved by only adding [HKDF](https://en.wikipedia.org/wiki/HKDF) as additional building block.
 
 The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to be compatible with most [_Android_](https://www.android.com/) versions as well as normal Java applications.
+
+_Note, that this project is ongoing research and may not be ready for prime-time yet as it requires more feedback from the cryptographic community._
 
 ## Quickstart
 
@@ -143,9 +143,26 @@ SecretKey macSecretKey = new SecretKeySpec(keys.get(1), "HmacSHA512");
 
 ## Description
 
-In the following the detauls of each of the protocols are discussed.
+In the following the details of each of the protocols are discussed.
+
+In the example the following functions are used:
+
+    bcrypt(cost_factor {4-31}, user_pw, [16-byte-salt])
+    hkdf_extract(salt, input_key_material)
+    hkdf_expand(output_key_material, info_param, out_length_byte)
+
+The [HMAC](https://en.wikipedia.org/wiki/HMAC) used by [HKDF](https://tools.ietf.org/html/rfc5869) is defined by the used hash version, currently only HMAC-SHA512 is supported.
 
 ### Password Hash Protocol
+
+#### Step 1: Extract User Password
+
+First create uniformly distributed entropy byte string with through HKDF "extract" from user password. Convert the user password to a byte array using UTF-8 encoding. Use an empty byte array as salt with the length of the underyling hash output length (aka HMAC-SHA512 == 64 byte)
+
+    utf8PwBytes = user_password.getUtf8Bytes()
+    extractedPw = hkdf_extract(empty_byte_array, utf8PwBytes)
+   
+#### Step 2: Stretch with BCrypt
 
 tbd.
 
