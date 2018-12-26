@@ -62,4 +62,14 @@ public class PasswordHasherTest {
     public void testInvalidCostFactor2() {
         hasher.hash("secret".toCharArray(), 32);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testPwTooLong() {
+        hasher.hash(new char[257], 4);
+    }
+
+    @Test
+    public void testPwNotTooLong() {
+        hasher.hash(new char[256], 4);
+    }
 }

@@ -3,6 +3,7 @@
 ## v0.4.0
 
 * add previous hash to upgrade salt schedule
+* limit password input to 256 characters
 * add more tests
 
 ## v0.3.0

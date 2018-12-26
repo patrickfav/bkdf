@@ -11,13 +11,15 @@ import java.security.SecureRandom;
  */
 public interface PasswordHasher {
 
+    int MAX_PASSWORD_LENGTH = 256;
+
     /**
      * For given password and cost-factor create password hash.
      * <p>
      * The internal salt will be created automatically with a secure CPRNG. Usually implementations
      * support passing your own implementation of a CPRNG (i.e. {@link SecureRandom}).
      *
-     * @param password   from user
+     * @param password   from user (length must not be greater than {@link #MAX_PASSWORD_LENGTH})
      * @param costFactor exponential cost (log2 factor) between 4 and 31 e.g. 12 --&gt;
      *                   2^12 = 4,096 iterations (higher == slower == more secure)
      * @return "BKDF Password Hash Message Format 2" ie. Base64 encoded password hash for storage
@@ -29,7 +31,7 @@ public interface PasswordHasher {
      * This method will return a more flexible model to be used to either access all the parts of the format
      * or create different message formats from it.
      *
-     * @param password   from user
+     * @param password   from user (length must not be greater than {@link #MAX_PASSWORD_LENGTH})
      * @param costFactor exponential cost (log2 factor) between 4 and 31 e.g. 12 --&gt;
      *                   2^12 = 4,096 iterations (higher == slower == more secure)
      * @return password hash in flexible {@link HashData} model
@@ -73,6 +75,9 @@ public interface PasswordHasher {
         }
 
         HashData hashRaw(char[] password, byte[] salt16Byte, int costFactor) {
+            if (password.length > MAX_PASSWORD_LENGTH) {
+                throw new IllegalArgumentException("password length must not be greater than " + MAX_PASSWORD_LENGTH);
+            }
             if (salt16Byte == null || salt16Byte.length < 16) {
                 throw new IllegalArgumentException("invalid salt");
             }
