@@ -5,11 +5,7 @@ import at.favre.lib.crypto.HKDF;
 import at.favre.lib.crypto.bcrypt.BCrypt;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Key Derivation protocol of BKDF. Used for derived high entropy secret keys from user passwords with a given cost factor.
@@ -80,7 +76,7 @@ public interface KeyDerivationFunction {
      * The output key material can be used as secret key like that:
      *
      * <pre>
-     *     List<byte[]> okmList = kdf.derive(...);
+     *     List&lt;byte[]&gt; okmList = kdf.derive(...);
      *     SecretKey secretKey = new SecretKeySpec(okmList.get(0),"AES");
      * </pre>
      * <p>
