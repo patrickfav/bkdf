@@ -198,9 +198,16 @@ Add to your `build.gradle` module dependencies:
 
 [Grab jar from latest release.](https://github.com/patrickfav/bkdf/releases/latest)
 
-## Digital Signatures
+## Security Relevant Information
 
-### Signed Jar
+### OWASP Dependency Check
+
+This project uses the [OWASP Dependency-Check](https://www.owasp.org/index.php/OWASP_Dependency_Check) which is a utility that identifies project dependencies and checks if there are any known, publicly disclosed, vulnerabilities against a [NIST database](https://nvd.nist.gov/vuln/data-feeds).
+The build will fail if any issue is found.
+
+### Digital Signatures
+
+#### Signed Jar
 
 The provided JARs in the Github release page are signed with my private key:
 
@@ -211,7 +218,7 @@ The provided JARs in the Github release page are signed with my private key:
 
 Use the jarsigner tool (found in your `$JAVA_HOME/bin` folder) folder to verify.
 
-### Signed Commits
+#### Signed Commits
 
 All tags and commits by me are signed with git with my private key:
 
