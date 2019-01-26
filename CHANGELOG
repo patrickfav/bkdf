@@ -5,6 +5,7 @@
 * add previous hash to upgrade salt schedule
 * limit password input to 256 characters
 * add more tests
+* add OSWAP dependency check plugin to Maven POM #14
 
 ## v0.3.0
 
