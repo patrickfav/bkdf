@@ -90,6 +90,7 @@ public interface PasswordHasher {
         }
 
         HashData hashRaw(byte[] pwBytes, byte[] salt16Byte, int costFactor) {
+            // extract 64 byte long hash with HKDF-HMAC-SHA512 (depending on version)
             byte[] extractedPw = version.getHkdf().extract(null, pwBytes);
 
             BCrypt.HashData data = BCrypt.with(
