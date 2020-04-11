@@ -20,6 +20,11 @@
     <url>https://github.com/patrickfav/bkdf</url>
     <inceptionYear>2018</inceptionYear>
 
+    <properties>
+        <!-- set this to true if fail because of missing credentials -->
+        <commonConfig.jarSign.skip>false</commonConfig.jarSign.skip>
+    </properties>
+
     <repositories>
         <repository>
             <id>jcenter</id>
@@ -76,7 +81,7 @@
         <dependency>
             <groupId>at.favre.lib</groupId>
             <artifactId>hkdf</artifactId>
-            <version>1.0.2</version>
+            <version>1.1.0</version>
         </dependency>
         <dependency>
             <groupId>at.favre.lib</groupId>
