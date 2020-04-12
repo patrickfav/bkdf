@@ -141,7 +141,7 @@ public interface KeyDerivationFunction {
             BCrypt.HashData data = BCrypt.with(
                     new BCrypt.Version(new byte[]{0x32, 0x61},
                             hashByteLength == Version.MIN_BCRYPT_HASH_LENGTH_BYTE,
-                            true, null, null))
+                            true, BCrypt.Version.DEFAULT_MAX_PW_LENGTH_BYTE ,null, null))
                     .hashRaw(costFactor, salt, extractedPw);
 
             List<byte[]> outList = new ArrayList<>(configList.size());
