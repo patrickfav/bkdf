@@ -6,6 +6,8 @@ import at.favre.lib.crypto.bcrypt.BCrypt;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
+import static at.favre.lib.crypto.bcrypt.BCrypt.Version.DEFAULT_MAX_PW_LENGTH_BYTE;
+
 /**
  * Implementation for the BKDF Password Hash protocol used for key stretching of weak user passwords and hash storage.
  */
@@ -96,7 +98,7 @@ public interface PasswordHasher {
             BCrypt.HashData data = BCrypt.with(
                     new BCrypt.Version(new byte[]{0x32, 0x61},
                             version.getHashByteLength() == Version.MIN_BCRYPT_HASH_LENGTH_BYTE,
-                            true, null, null))
+                            true, BCrypt.Version.DEFAULT_MAX_PW_LENGTH_BYTE, null, null))
                     .hashRaw(costFactor, salt16Byte, extractedPw);
 
             return new HashData((byte) costFactor, version, salt16Byte, data.rawHash);
