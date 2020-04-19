@@ -2,6 +2,11 @@
 
 ## v0.5.0
 
+* update Bcrypt dependency
+* use common parent POM and updates various maven plugins
+* fix CVE-2019-9658 by updating Checkstyle
+* update OWASP dependency checker
+
 ## v0.4.0
 
 * add previous hash to upgrade salt schedule
