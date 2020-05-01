@@ -21,11 +21,13 @@ _Note, that this project is ongoing research and may not be ready for prime-time
 
 Add dependency to your `pom.xml` ([check latest release](https://github.com/patrickfav/bkdf/releases)):
 
-    <dependency>
-        <groupId>at.favre.lib</groupId>
-        <artifactId>bkdf</artifactId>
-        <version>{latest-version}</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>at.favre.lib</groupId>
+    <artifactId>bkdf</artifactId>
+    <version>{latest-version}</version>
+</dependency>
+```
 
 A very simple example using the password hasher:
 
@@ -182,11 +184,13 @@ The artifacts are deployed to [jcenter](https://bintray.com/bintray/jcenter) and
 
 Add dependency to your `pom.xml`:
 
-    <dependency>
-        <groupId>at.favre.lib</groupId>
-        <artifactId>bkdf</artifactId>
-        <version>{latest-version}</version>
-    </dependency>
+```xml
+<dependency>
+    <groupId>at.favre.lib</groupId>
+    <artifactId>bkdf</artifactId>
+    <version>{latest-version}</version>
+</dependency>
+```
 
 ### Gradle
 
