@@ -1,6 +1,6 @@
 package at.favre.lib.crypto.bkdf;
 
-import at.favre.lib.crypto.HKDF;
+import at.favre.lib.hkdf.HKDF;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

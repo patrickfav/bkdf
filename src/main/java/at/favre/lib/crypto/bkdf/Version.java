@@ -1,7 +1,7 @@
 package at.favre.lib.crypto.bkdf;
 
 import at.favre.lib.bytes.Bytes;
-import at.favre.lib.crypto.HKDF;
+import at.favre.lib.hkdf.HKDF;
 
 import java.util.Arrays;
 import java.util.Collections;

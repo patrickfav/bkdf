@@ -7,7 +7,7 @@
     <parent>
         <groupId>at.favre.lib</groupId>
         <artifactId>common-parent</artifactId>
-        <version>12</version>
+        <version>20</version>
     </parent>
 
     <artifactId>bkdf</artifactId>
@@ -17,24 +17,19 @@
     <name>BCrypt Key Derivation Function</name>
     <description>A extension of the BCrypt password hashing protocol to fix many of its issues and
     </description>
-    <url>https://github.com/patrickfav/bkdf</url>
+    <url>https://favr.dev/opensource/bkdf</url>
     <inceptionYear>2018</inceptionYear>
 
     <properties>
         <!-- set this to true if fail because of missing credentials -->
         <commonConfig.jarSign.skip>false</commonConfig.jarSign.skip>
+        <!-- SonarQube Config -->
+        <sonar.organization>patrickfav</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.language>java</sonar.language>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>jcenter</id>
-            <name>jcenter</name>
-            <url>https://jcenter.bintray.com</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
@@ -59,10 +54,6 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
             <plugin>
-                <groupId>org.eluder.coveralls</groupId>
-                <artifactId>coveralls-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jarsigner-plugin</artifactId>
             </plugin>
@@ -81,12 +72,12 @@
         <dependency>
             <groupId>at.favre.lib</groupId>
             <artifactId>hkdf</artifactId>
-            <version>1.1.0</version>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>at.favre.lib</groupId>
             <artifactId>bcrypt</artifactId>
-            <version>0.9.0</version>
+            <version>0.10.2</version>
         </dependency>
         <!-- test -->
         <dependency>
@@ -97,18 +88,9 @@
 
     </dependencies>
 
-    <distributionManagement>
-        <repository>
-            <id>bintray-patrickfav</id>
-            <name>patrickfav-bkdf</name>
-            <url>https://api.bintray.com/maven/patrickfav/maven/bkdf/;publish=1</url>
-        </repository>
-    </distributionManagement>
-
     <scm>
-        <connection>https://github.com/patrickfav/bkdf.git</connection>
-        <developerConnection>https://github.com/patrickfav/bkdf.git</developerConnection>
-        <tag>HEAD</tag>
+        <connection>scm:git:https://github.com/patrickfav/bkdf.git</connection>
+        <developerConnection>scm:git:https://github.com/patrickfav/bkdf.git</developerConnection>
         <url>https://github.com/patrickfav/bkdf</url>
     </scm>
 
@@ -118,7 +100,7 @@
     </issueManagement>
 
     <ciManagement>
-        <system>Travis</system>
-        <url>https://travis-ci.org/patrickfav/bkdf</url>
+        <system>Github Actions</system>
+        <url>https://github.com/patrickfav/bkdf/actions</url>
     </ciManagement>
 </project>
