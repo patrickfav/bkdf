@@ -11,7 +11,7 @@ public interface PasswordHashVerifier {
      * Verify a given type 2 format message (encoded as base64) and given user password
      *
      * @param password                from user
-     * @param bkdfPasswordHashFormat2 "BKDF Password Hash Message Format 2" ie. Base64 encoded password hash for storage,
+     * @param bkdfPasswordHashFormat2 "BKDF Password Hash Message Format 2" i.e. Base64 encoded password hash for storage,
      *                                see {@link PasswordHasher#hash(char[], int)};
      * @return true iff given password matches given password hash, false otherwise
      */

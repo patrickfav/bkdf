@@ -41,7 +41,7 @@ public final class HashData {
     /**
      * Parse BKDF Password Hash Message Formt 2
      *
-     * @param bkdfPasswordHashFormat2 "BKDF Password Hash Message Format 2" ie. Base64 encoded password hash for storage,
+     * @param bkdfPasswordHashFormat2 "BKDF Password Hash Message Format 2" i.e. Base64 encoded password hash for storage,
      *                                see {@link PasswordHasher#hash(char[], int)};
      * @return parsed data
      */
@@ -52,7 +52,7 @@ public final class HashData {
     /**
      * Create new instance
      *
-     * @param cost    cost factor (ie. how expensive it is to calculate)
+     * @param cost    cost factor (i.e. how expensive it is to calculate)
      * @param version of used hash config
      * @param rawSalt salt as byte array
      * @param rawHash bcrypt hash as byte array
@@ -73,8 +73,8 @@ public final class HashData {
     /**
      * Get the "BKDF Password Hash Message Format 1" which is in blob/byte array form
      * <p>
-     * Currently this is the following format:
-     *
+     * Currently, this is the following format:
+     * <p>
      * <code>V C S S S S S S S S S S S S S S S S H H H H H H H H H H ...</code>
      * <ul>
      * <li>V: 1 byte version code</li>

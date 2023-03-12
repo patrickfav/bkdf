@@ -50,7 +50,7 @@ public interface Version {
     byte getVersionCode();
 
     /**
-     * What HKDF version to use (ie. which mac implementation is used)
+     * What HKDF version to use (i.e. which mac implementation is used)
      *
      * @return HKDF instance
      */

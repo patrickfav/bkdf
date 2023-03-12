@@ -1,11 +1,14 @@
 # BCrypt based Key Derivation Function (BKDF)
 
 [![Maven Central](https://img.shields.io/maven-central/v/at.favre.lib/bkdf)](https://mvnrepository.com/artifact/at.favre.lib/bkdf)
-[![Build Status](https://travis-ci.org/patrickfav/bkdf.svg?branch=master)](https://travis-ci.org/patrickfav/bkdf)
+[![Github Actions](https://github.com/patrickfav/bkdf/actions/workflows/build_deploy.yml/badge.svg)](https://github.com/patrickfav/bkdf/actions)
 [![Javadocs](https://www.javadoc.io/badge/at.favre.lib/bkdf.svg)](https://www.javadoc.io/doc/at.favre.lib/bkdf)
-[![Coverage Status](https://coveralls.io/repos/github/patrickfav/bkdf/badge.svg?branch=master)](https://coveralls.io/github/patrickfav/bkdf?branch=master) [![Maintainability](https://api.codeclimate.com/v1/badges/fc50d911e4146a570d4e/maintainability)](https://codeclimate.com/github/patrickfav/bkdf/maintainability)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=patrickfav_bkdf&metric=coverage)](https://sonarcloud.io/summary/new_code?id=patrickfav_bkdf)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=patrickfav_bkdf&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=patrickfav_bkdf)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=patrickfav_bkdf&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=patrickfav_bkdf)
 
-The aim of this project is to improve on the cryptographic primitive [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) with providing well defined modes of operation which includes:
+The aim of this project is to improve on the cryptographic primitive [BCrypt](https://en.wikipedia.org/wiki/Bcrypt) with
+providing well-defined modes of operation which includes:
 
 * Improved password hashing function
 * Protocol to upgrade password hashes offline
@@ -83,10 +86,10 @@ char[] pw = "secret".toCharArray();
 
 // hash with cost factor 5
 String hash = BKDF.createPasswordHasher().hash(pw, 5);
-PasswordHashUpgrader upgrader = new PasswordHashUpgrader.Default(new SecureRandom());
+        PasswordHashUpgrader upgrader=new PasswordHashUpgrader.Default(new SecureRandom());
 
-// upgrade hash with an additional cost factor (ie. now needs to calculate 5 + 6 = 32 + 64 = 96 iterations
-CompoundHashData compoundHashData = upgrader.upgradePasswordHashWith(6, hash);
+// upgrade hash with an additional cost factor (i.e. now needs to calculate 5 + 6 = 32 + 64 = 96 iterations
+        CompoundHashData compoundHashData=upgrader.upgradePasswordHashWith(6,hash);
 
 // create base64 url-safe encoded msg and verify
 boolean verified = BKDF.createPasswordHashVerifier().verify(pw, compoundHashData.getAsEncodedMessageFormat());
@@ -127,8 +130,8 @@ SecretKey aesSecretKey = new SecretKeySpec(aesKey, "AES");
 To generate multiple keys, use the following example, so you are not required to generate the internal bcrypt hash for every key: 
 
 ```java
-// a entropy source used in your current protocol
-byte[] ikm = Bytes.random(12).array();
+// an entropy source used in your current protocol
+byte[]ikm=Bytes.random(12).array();
 byte[] salt = Bytes.random(16).array();
 int costFactor = 5;
 
@@ -200,7 +203,7 @@ Add to your `build.gradle` module dependencies:
 
 ### Local Jar
 
-[Grab jar from latest release.](https://github.com/patrickfav/bkdf/releases/latest)
+[Grab jar from the latest release.](https://github.com/patrickfav/bkdf/releases/latest)
 
 ## Security Relevant Information
 
@@ -213,7 +216,7 @@ The build will fail if any issue is found.
 
 #### Signed Jar
 
-The provided JARs in the Github release page are signed with my private key:
+The provided JARs in the GitHub release page are signed with my private key:
 
     CN=Patrick Favre-Bulle, OU=Private, O=PF Github Open Source, L=Vienna, ST=Vienna, C=AT
     Validity: Thu Sep 07 16:40:57 SGT 2017 to: Fri Feb 10 16:40:57 SGT 2034
@@ -255,7 +258,7 @@ This project uses my [`common-parent`](https://github.com/patrickfav/mvn-common-
 the plugin versions aswell as providing the checkstyle config rules. Specifically they are maintained in [`checkstyle-config`](https://github.com/patrickfav/checkstyle-config). Locally the files will be copied after you `mvnw install` into your `target` folder and is called
 `target/checkstyle-checker.xml`. So if you use a plugin for your IDE, use this file as your local configuration.
 
-## Tech Stack
+## Tech-Stack
 
 * Java 7 (+ [errorprone](https://github.com/google/error-prone) static analyzer)
 * Maven

@@ -19,12 +19,12 @@ import java.util.List;
  * <p>
  * The disadvantage of the first approach is that the weak hashes remain in the DB until a user logs in again, which may be days, weeks or never.
  * <p>
- * This class introduces an easy way to to support the second approach by providing a defined protocol and data format for hash upgrading by
+ * This class introduces an easy way to support the second approach by providing a defined protocol and data format for hash upgrading by
  * chaining bcrypt hashes.
  * <p>
  * See
- * - https://security.stackexchange.com/questions/15847/is-it-possible-to-increase-the-cost-of-bcrypt-or-pbkdf2-when-its-already-calcula
- * - https://crypto.stackexchange.com/questions/3003/do-i-have-to-recompute-all-hashes-if-i-change-the-work-factor-in-bcrypt
+ * - <a href="https://security.stackexchange.com/questions/15847/is-it-possible-to-increase-the-cost-of-bcrypt-or-pbkdf2-when-its-already-calcula">link 1</a>
+ * - <a href="https://crypto.stackexchange.com/questions/3003/do-i-have-to-recompute-all-hashes-if-i-change-the-work-factor-in-bcrypt">link 2</a>
  */
 public interface PasswordHashUpgrader {
     /**
@@ -33,10 +33,10 @@ public interface PasswordHashUpgrader {
     byte COMPOUND_FORMAT_VERSION = (byte) 0xFE;
 
     /**
-     * Upgrades the given hash <strong>with</strong> the given new hash config (ie. version and cost factor).
+     * Upgrades the given hash <strong>with</strong> the given new hash config (i.e. version and cost factor).
      * <p>
-     * This will chain the current hash with given hash exactly as defined by the the input paramters. E.g.
-     * if the current hash is <code>[(VERSION_1, 4)]</code> and the the following will be passed: (VERSION_2, 10), the resulting
+     * This will chain the current hash with given hash exactly as defined by the input paramters. E.g.
+     * if the current hash is <code>[(VERSION_1, 4)]</code> and the following will be passed: (VERSION_2, 10), the resulting
      * hash config is <code>[(VERSION_1, 4), (VERSION_2, 10)]</code>.
      *
      * @param version                 of the BKDF password hash to be used
@@ -49,8 +49,8 @@ public interface PasswordHashUpgrader {
     /**
      * Upgrades the given hash <strong>with</strong> the given new cost factor and default version
      * <p>
-     * This will chain the current hash with given hash exactly as defined by the the input paramters. E.g.
-     * if the current hash is <code>[(VERSION_1, 4)]</code> and the the following will be passed: (VERSION_2, 10), the resulting
+     * This will chain the current hash with given hash exactly as defined by the input paramters. E.g.
+     * if the current hash is <code>[(VERSION_1, 4)]</code> and the following will be passed: (VERSION_2, 10), the resulting
      * hash config is <code>[(VERSION_1, 4), (VERSION_2, 10)]</code>.
      *
      * @param costFactor              to be used on the current hash
@@ -88,7 +88,7 @@ public interface PasswordHashUpgrader {
      * <p>
      * See {@link #COMPOUND_FORMAT_VERSION} and {@link CompoundHashData}
      *
-     * @param bkdfPasswordHashFormat2 to possible be in compound hash format
+     * @param bkdfPasswordHashFormat2 to possibly be in compound hash format
      * @return iff given data has the version identifier of a compound format
      */
     boolean isCompoundHashMessage(String bkdfPasswordHashFormat2);
@@ -181,7 +181,7 @@ public interface PasswordHashUpgrader {
         }
 
         /**
-         * Calculates a possible upgrade path from current hashes to achieve a new target hash. Eg. given the work factor of 5 (=32) and a
+         * Calculates a possible upgrade path from current hashes to achieve a new target hash. E.g. given the work factor of 5 (=32) and a
          * target of 8 (=256), a path of [5, 6, 7] would be required to achieve 256 iterations.
          *
          * @param fromCostFactor current hash config

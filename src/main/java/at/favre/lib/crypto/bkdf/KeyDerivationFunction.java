@@ -30,7 +30,7 @@ public interface KeyDerivationFunction {
      *     SecretKey secretKey = new SecretKeySpec(okm,"AES");
      * </pre>
      * <p>
-     * This will create a AES key from the <code>okm</code> (output key material).
+     * This will create an AES key from the <code>okm</code> (output key material).
      *
      * @param salt          at least 16 byte long nonce (number used once); salt is not required to be secret
      * @param password      user provided password
@@ -54,7 +54,7 @@ public interface KeyDerivationFunction {
      *     SecretKey secretKey = new SecretKeySpec(okm,"AES");
      * </pre>
      * <p>
-     * This will create a AES key from the <code>okm</code> (output key material).
+     * This will create an AES key from the <code>okm</code> (output key material).
      *
      * @param salt          at least 16 byte long nonce (number used once); salt is not required to be secret
      * @param ikm           user provided password as byte array or other password reheated entropy
@@ -80,7 +80,7 @@ public interface KeyDerivationFunction {
      *     SecretKey secretKey = new SecretKeySpec(okmList.get(0),"AES");
      * </pre>
      * <p>
-     * This will create a AES key from the <code>okm</code> (output key material).
+     * This will create an AES key from the <code>okm</code> (output key material).
      *
      * @param salt       at least 16 byte long nonce (number used once); salt is not required to be secret
      * @param ikm        user provided password as byte array or other password reheated entropy
@@ -135,9 +135,9 @@ public interface KeyDerivationFunction {
             byte[] extractedPw = hkdf.extract((byte[]) null, ikm);
 
             BCrypt.HashData data = BCrypt.with(
-                    new BCrypt.Version(new byte[]{0x32, 0x61},
-                            hashByteLength == Version.MIN_BCRYPT_HASH_LENGTH_BYTE,
-                            true, BCrypt.Version.DEFAULT_MAX_PW_LENGTH_BYTE ,null, null))
+                            new BCrypt.Version(new byte[]{0x32, 0x61},
+                                    hashByteLength == Version.MIN_BCRYPT_HASH_LENGTH_BYTE,
+                                    true, BCrypt.Version.MAX_PW_LENGTH_BYTE, null, null))
                     .hashRaw(costFactor, salt, extractedPw);
 
             List<byte[]> outList = new ArrayList<>(configList.size());
@@ -154,7 +154,7 @@ public interface KeyDerivationFunction {
     }
 
     /**
-     * Wraps some of the needed configs for use in KDF
+     * Wraps some needed configs for use in KDF
      */
     final class KdfConfig {
         public final byte[] infoParam;

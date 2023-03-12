@@ -110,7 +110,7 @@ public final class CompoundHashData {
      * Create the serialized message in raw byte array / blob format.
      * <p>
      * The format is
-     *
+     * <p>
      * <code>V L CC CC CC CC ... SSSSSSSSSSSSSSSS HHHHHHHHHHHHHHHH</code>
      * <ul>
      * <li>V: the version byte</li>

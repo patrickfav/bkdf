@@ -22,7 +22,7 @@ public interface PasswordHasher {
      * @param password   from user (length must not be greater than {@link #MAX_PASSWORD_LENGTH})
      * @param costFactor exponential cost (log2 factor) between 4 and 31 e.g. 12 --&gt;
      *                   2^12 = 4,096 iterations (higher == slower == more secure)
-     * @return "BKDF Password Hash Message Format 2" ie. Base64 encoded password hash for storage
+     * @return "BKDF Password Hash Message Format 2" i.e. Base64 encoded password hash for storage
      */
     String hash(char[] password, int costFactor);
 
