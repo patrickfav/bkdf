@@ -16,7 +16,8 @@ providing well-defined modes of operation which includes:
 
 All this is achieved by only adding [HKDF](https://en.wikipedia.org/wiki/HKDF) as additional building block.
 
-The code is compiled with target [Java 7](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to be compatible with most [_Android_](https://www.android.com/) versions as well as normal Java applications.
+The code is compiled with target [Java 20](https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7) to leverage [Java's module system](https://www.oracle.com/corporate/features/understanding-java-9-modules.html) and adopt new improvements in the JDK. 
+Please refer to versions 0.6.0 and below for Java 7 compatibility.
 
 _Note, that this project is ongoing research and may not be ready for prime-time yet as it requires more feedback from the cryptographic community._
 
